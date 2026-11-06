@@ -36,7 +36,8 @@ Los productos reales iniciales (Asociación La Tulpa) están en `data/productos_
 | Ruta | Descripción |
 |------|-------------|
 | `/` | Catálogo de productos (HU-01) |
-| `/api/productos` | JSON con los productos activos |
+| `/?categoria=frutas&q=fresa` | Catálogo filtrado por categoría y/o nombre (HU-02; sin distinguir mayúsculas ni tildes) |
+| `/api/productos` | JSON con los productos activos; acepta los mismos `categoria` y `q` |
 
 ## Despliegue (Vercel + Neon)
 

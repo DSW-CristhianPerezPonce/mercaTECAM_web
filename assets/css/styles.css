@@ -57,8 +57,77 @@ a { color: var(--verde); }
 
 /* Catálogo */
 .catalogo { padding: 32px 0 48px; }
-.catalogo__cabecera h1 { margin: 0 0 4px; font-size: clamp(1.5rem, 3vw, 2rem); }
-.catalogo__cabecera p  { margin: 0 0 24px; color: var(--texto-suave); }
+.catalogo__cabecera h1 { margin: 0 0 16px; font-size: clamp(1.5rem, 3vw, 2rem); }
+.catalogo__resumen { margin: 0 0 20px; color: var(--texto-suave); }
+
+/* HU-02: buscador */
+.buscador { display: flex; gap: 8px; margin-bottom: 14px; max-width: 560px; }
+.buscador__campo {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 14px;
+    font: inherit;
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+    background: var(--blanco);
+}
+.buscador__campo:focus { outline: 2px solid var(--verde); outline-offset: 1px; border-color: transparent; }
+.buscador__boton {
+    padding: 11px 20px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--blanco);
+    background: var(--verde);
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.buscador__boton:hover { background: var(--verde-oscuro); }
+
+/* HU-02: botones de categoría (en móvil se desplazan horizontalmente) */
+.filtros {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+.filtro {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+    background: var(--blanco);
+    color: var(--texto);
+    font-size: .9rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.filtro:hover { border-color: var(--verde); }
+.filtro--activo { background: var(--verde); border-color: var(--verde); color: var(--blanco); }
+.filtro__total {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #efeadd;
+    color: var(--texto-suave);
+    font-size: .75rem;
+    text-align: center;
+}
+.filtro--activo .filtro__total { background: rgba(255, 255, 255, .22); color: var(--blanco); }
+
+.visualmente-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
 
 .cuadricula {
     list-style: none;
@@ -114,6 +183,7 @@ a { color: var(--verde); }
 .etiqueta--aromaticas { color: #6a4c93; }
 
 .vacio { text-align: center; padding: 64px 16px; color: var(--texto-suave); }
+.vacio__titulo { font-size: 1.15rem; font-weight: 600; color: var(--texto); }
 
 .pie {
     border-top: 1px solid var(--borde);

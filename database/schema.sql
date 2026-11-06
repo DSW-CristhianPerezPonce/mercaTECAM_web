@@ -1,5 +1,8 @@
--- mercaTECAM · Modelo de datos (HU-01)
--- Ejecutar sobre una base PostgreSQL vacía:  psql "$DATABASE_URL" -f database/schema.sql
+-- mercaTECAM · Modelo de datos (HU-01, HU-02)
+-- Aplicar con:  php scripts/migrar.php   (idempotente)
+
+-- HU-02: búsqueda por nombre sin importar tildes ("limon" encuentra "Limón")
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 CREATE TABLE IF NOT EXISTS categorias (
     id      SERIAL PRIMARY KEY,

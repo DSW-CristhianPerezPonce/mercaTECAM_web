@@ -7,10 +7,17 @@ require_once dirname(__DIR__) . '/src/bootstrap.php';
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+// Filtros del catálogo (HU-02): ?categoria=<slug>&q=<texto>
+$categoria = query_param('categoria', 40);
+$busqueda  = query_param('q', 100);
+
 try {
     if ($method === 'GET' && $path === '/api/productos') {
         $repo = new ProductRepository(Database::connection());
-        json_response(['data' => $repo->listarCatalogo()]);
+        json_response([
+            'filtros' => ['categoria' => $categoria, 'q' => $busqueda],
+            'data'    => $repo->listarCatalogo($categoria, $busqueda),
+        ]);
         return;
     }
 
@@ -18,7 +25,12 @@ try {
         $repo = new ProductRepository(Database::connection());
         echo render('layout', [
             'titulo'    => 'Catálogo de productos',
-            'contenido' => render('catalog', ['productos' => $repo->listarCatalogo()]),
+            'contenido' => render('catalog', [
+                'productos'  => $repo->listarCatalogo($categoria, $busqueda),
+                'categorias' => $repo->categoriasConConteo(),
+                'categoria'  => $categoria,
+                'busqueda'   => $busqueda,
+            ]),
         ]);
         return;
     }
