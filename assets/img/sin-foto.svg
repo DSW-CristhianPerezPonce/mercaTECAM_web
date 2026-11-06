@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Producto sin foto">
+  <rect width="400" height="300" fill="#eee9dc"/>
+  <g fill="none" stroke="#a8a08a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M200 205c0-45 25-75 60-85-5 40-25 70-60 85z"/>
+    <path d="M200 205c0-40-22-66-52-74 4 35 22 60 52 74z"/>
+    <path d="M200 205v30"/>
+  </g>
+  <text x="200" y="272" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" fill="#8c846e">Sin foto</text>
+</svg>

@@ -1,0 +1,4 @@
+.env
+.vercel/
+/data/fotos/*
+!/data/fotos/.gitkeep

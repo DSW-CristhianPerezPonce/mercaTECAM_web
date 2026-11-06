@@ -1,0 +1,42 @@
+<?php
+declare(strict_types=1);
+
+// Punto de entrada único (Vercel enruta aquí todo lo que no es archivo estático).
+require_once dirname(__DIR__) . '/src/bootstrap.php';
+
+$path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+try {
+    if ($method === 'GET' && $path === '/api/productos') {
+        $repo = new ProductRepository(Database::connection());
+        json_response(['data' => $repo->listarCatalogo()]);
+        return;
+    }
+
+    if ($method === 'GET' && ($path === '/' || $path === '/catalogo')) {
+        $repo = new ProductRepository(Database::connection());
+        echo render('layout', [
+            'titulo'    => 'Catálogo de productos',
+            'contenido' => render('catalog', ['productos' => $repo->listarCatalogo()]),
+        ]);
+        return;
+    }
+
+    http_response_code(404);
+    echo render('layout', [
+        'titulo'    => 'Página no encontrada',
+        'contenido' => '<section class="vacio"><h1>Página no encontrada</h1><p><a href="/">Volver al catálogo</a></p></section>',
+    ]);
+} catch (Throwable $ex) {
+    error_log('[mercaTECAM] ' . $ex->getMessage());
+    if (str_starts_with($path, '/api/')) {
+        json_response(['error' => 'Error interno del servidor'], 500);
+        return;
+    }
+    http_response_code(500);
+    echo render('layout', [
+        'titulo'    => 'Error',
+        'contenido' => '<section class="vacio"><h1>Tenemos un problema</h1><p>No pudimos cargar el catálogo. Intenta de nuevo en unos minutos.</p></section>',
+    ]);
+}

@@ -1,0 +1,2 @@
+nombre;categoria;precio_referencia;unidad;disponibilidad;productor;municipio;asociacion;imagen;descripcion
+Ejemplo: Tomate chonto;hortalizas;4.500;kg;30;Nombre del productor;Municipio;Asociación (opcional);tomate.jpg;Descripción corta (opcional)
