@@ -27,6 +27,8 @@ php -S localhost:8000 router.php          # http://localhost:8000
 2. Ponga las fotos en `data/fotos/` con el mismo nombre de archivo de la columna `imagen`.
 3. Ejecute `php scripts/importar_productos.php`. Las fotos se copian (reducidas a 800 px si hay GD) a `assets/productos/`, que **sí** se sube al repositorio.
 
+Columnas opcionales de la ficha (HU-03): `especificaciones`, `practicas_agroecologicas`, `valor_agregado`, con los ítems separados por `|`. El contenido actual sale del inventario de La Tulpa y de https://redenjambre.com (Asociación La Tulpa y Canastas Verdes); no agregue datos sin una fuente.
+
 Categorías válidas: `procesados`, `verduras`, `hortalizas`, `artesanias`, `frutas`, `aromaticas`.
 
 Los productos reales iniciales (Asociación La Tulpa) están en `data/productos_importar.csv`, convertido desde el inventario original `data/productos.csv`.
@@ -38,6 +40,7 @@ Los productos reales iniciales (Asociación La Tulpa) están en `data/productos_
 | `/` | Catálogo de productos (HU-01) |
 | `/?categoria=frutas&q=fresa` | Catálogo filtrado por categoría y/o nombre (HU-02; sin distinguir mayúsculas ni tildes) |
 | `/api/productos` | JSON con los productos activos; acepta los mismos `categoria` y `q` |
+| `/producto/:id` | Ficha técnica del producto (HU-03); 404 si no existe, aviso «Agotado» si la disponibilidad es 0 |
 
 ## Despliegue (Vercel + Neon)
 

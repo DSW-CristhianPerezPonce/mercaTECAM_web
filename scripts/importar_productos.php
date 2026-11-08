@@ -10,6 +10,8 @@ declare(strict_types=1);
  *   nombre;categoria;precio_referencia;unidad;disponibilidad;productor;municipio;asociacion;imagen;descripcion
  *   - categoria: procesados | verduras | hortalizas | artesanias
  *   - imagen: nombre del archivo dentro de la carpeta de fotos (p. ej. tomate.jpg) o una URL https
+ * Columnas opcionales de la ficha (HU-03), con ítems separados por "|":
+ *   especificaciones;practicas_agroecologicas;valor_agregado
  *
  * Es idempotente: si el producto (nombre + productor) ya existe, lo actualiza.
  */
@@ -47,8 +49,10 @@ $upsertProductor = $db->prepare(<<<SQL
     SQL);
 
 $upsertProducto = $db->prepare(<<<SQL
-    INSERT INTO productos (nombre, descripcion, imagen, precio_referencia, unidad, disponibilidad, categoria_id, productor_id)
-    VALUES (:nombre, :descripcion, :imagen, :precio, :unidad, :disponibilidad, :categoria_id, :productor_id)
+    INSERT INTO productos (nombre, descripcion, imagen, precio_referencia, unidad, disponibilidad, categoria_id, productor_id,
+                           especificaciones, practicas_agroecologicas, valor_agregado)
+    VALUES (:nombre, :descripcion, :imagen, :precio, :unidad, :disponibilidad, :categoria_id, :productor_id,
+            :especificaciones, :practicas, :valor_agregado)
     ON CONFLICT (nombre, productor_id) DO UPDATE SET
         descripcion = EXCLUDED.descripcion,
         imagen = EXCLUDED.imagen,
@@ -56,6 +60,9 @@ $upsertProducto = $db->prepare(<<<SQL
         unidad = EXCLUDED.unidad,
         disponibilidad = EXCLUDED.disponibilidad,
         categoria_id = EXCLUDED.categoria_id,
+        especificaciones = EXCLUDED.especificaciones,
+        practicas_agroecologicas = EXCLUDED.practicas_agroecologicas,
+        valor_agregado = EXCLUDED.valor_agregado,
         activo = TRUE
     SQL);
 
@@ -101,6 +108,9 @@ foreach ($rows as $i => $fila) {
         'disponibilidad' => max(0, (int) parsearNumero($r['disponibilidad'] ?: '0')),
         'categoria_id'   => $categorias[$slugCategoria],
         'productor_id'   => $productorId,
+        'especificaciones' => listaTexto($r['especificaciones'] ?? ''),
+        'practicas'        => listaTexto($r['practicas_agroecologicas'] ?? ''),
+        'valor_agregado'   => listaTexto($r['valor_agregado'] ?? ''),
     ]);
     $ok++;
 }
@@ -146,6 +156,13 @@ function normalizar(string $texto): string
     $texto = mb_strtolower(trim($texto), 'UTF-8');
     $texto = strtr($texto, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
     return preg_replace('/\s+/', '_', $texto);
+}
+
+/** "a | b | c" (o un ítem por línea dentro de la celda) → "a\nb\nc". Vacío → null. */
+function listaTexto(string $celda): ?string
+{
+    $items = array_filter(array_map('trim', preg_split('/\||\R/', $celda)), static fn ($i) => $i !== '');
+    return $items === [] ? null : implode("\n", $items);
 }
 
 function slug(string $texto): string

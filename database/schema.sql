@@ -34,6 +34,11 @@ CREATE TABLE IF NOT EXISTS productos (
 
 CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria_id);
 
+-- HU-03: ficha técnica. Cada campo guarda una lista de ítems separados por salto de línea.
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS especificaciones          TEXT;
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS practicas_agroecologicas TEXT;
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS valor_agregado            TEXT;
+
 -- Categorías definidas en HU-02 + frutas y aromáticas (agregadas al cargar los productos reales, 05/11/2026)
 INSERT INTO categorias (slug, nombre) VALUES
     ('procesados', 'Productos procesados'),

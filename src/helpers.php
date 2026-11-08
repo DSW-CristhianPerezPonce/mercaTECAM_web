@@ -26,6 +26,25 @@ function imagen_producto(?string $ruta): string
     return $ruta;
 }
 
+/** Convierte un texto con un ítem por línea en lista (ignora líneas vacías). */
+function lineas(?string $texto): array
+{
+    if ($texto === null) {
+        return [];
+    }
+    return array_values(array_filter(array_map('trim', preg_split('/\R/', $texto)), static fn ($l) => $l !== ''));
+}
+
+/** Texto de disponibilidad declarada: "20 disponibles" / "Agotado". */
+function texto_disponibilidad(int $cantidad): string
+{
+    return match (true) {
+        $cantidad <= 0  => 'Agotado',
+        $cantidad === 1 => '1 disponible',
+        default         => "$cantidad disponibles",
+    };
+}
+
 /** Renderiza una plantilla de /templates con variables. */
 function render(string $template, array $vars = []): string
 {

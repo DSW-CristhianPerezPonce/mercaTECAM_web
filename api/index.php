@@ -35,6 +35,28 @@ try {
         return;
     }
 
+    // HU-03: ficha del producto (/producto/7). Ids no numéricos caen en el 404 general.
+    if ($method === 'GET' && preg_match('#^/producto/([1-9]\d{0,9})$#', $path, $m)) {
+        $repo = new ProductRepository(Database::connection());
+        $producto = $repo->obtenerPorId((int) $m[1]);
+
+        if ($producto === null) {
+            http_response_code(404);
+            echo render('layout', [
+                'titulo'    => 'Producto no encontrado',
+                'contenido' => render('producto-no-encontrado'),
+            ]);
+            return;
+        }
+
+        echo render('layout', [
+            'titulo'      => $producto['nombre'],
+            'descripcion' => $producto['descripcion'],
+            'contenido'   => render('producto', ['p' => $producto]),
+        ]);
+        return;
+    }
+
     http_response_code(404);
     echo render('layout', [
         'titulo'    => 'Página no encontrada',

@@ -59,6 +59,51 @@ final class ProductRepository
     }
 
     /**
+     * Ficha completa de un producto activo (HU-03). Devuelve null si no existe o está inactivo.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function obtenerPorId(int $id): ?array
+    {
+        // productos.id es SERIAL (INTEGER de PostgreSQL); fuera de rango no puede existir.
+        if ($id < 1 || $id > 2147483647) {
+            return null;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT p.id,
+                    p.nombre,
+                    p.descripcion,
+                    p.imagen,
+                    p.precio_referencia,
+                    p.unidad,
+                    p.disponibilidad,
+                    p.especificaciones,
+                    p.practicas_agroecologicas,
+                    p.valor_agregado,
+                    c.slug   AS categoria_slug,
+                    c.nombre AS categoria,
+                    pr.nombre     AS productor,
+                    pr.municipio  AS municipio,
+                    pr.asociacion AS asociacion
+               FROM productos p
+               JOIN categorias  c  ON c.id  = p.categoria_id
+               JOIN productores pr ON pr.id = p.productor_id
+              WHERE p.id = :id AND p.activo = TRUE'
+        );
+        $stmt->execute(['id' => $id]);
+        $r = $stmt->fetch();
+        if ($r === false) {
+            return null;
+        }
+
+        $r['id']                = (int) $r['id'];
+        $r['precio_referencia'] = (float) $r['precio_referencia'];
+        $r['disponibilidad']    = (int) $r['disponibilidad'];
+        return $r;
+    }
+
+    /**
      * Todas las categorías con la cantidad de productos activos de cada una
      * (se listan también las que aún no tienen productos).
      *

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($titulo) ?> · mercaTECAM</title>
-    <meta name="description" content="Productos agroecológicos directo del campesino y sus asociaciones.">
+    <meta name="description" content="<?= e($descripcion ?? 'Productos agroecológicos directo del campesino y sus asociaciones.') ?>">
     <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>

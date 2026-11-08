@@ -150,7 +150,10 @@ a { color: var(--verde); }
     flex-direction: column;
     transition: transform .15s ease, box-shadow .15s ease;
 }
-.tarjeta:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(40, 40, 30, .12); }
+a.tarjeta { color: inherit; text-decoration: none; }
+.tarjeta:hover, .tarjeta:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(40, 40, 30, .12); }
+.tarjeta:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+.tarjeta--agotado .tarjeta__imagen img { filter: grayscale(.85); opacity: .75; }
 
 .tarjeta__imagen { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #eee9dc; }
 /* Absoluta para que fotos verticales no estiren la tarjeta: todas quedan 4:3 recortadas al centro */
@@ -181,6 +184,76 @@ a { color: var(--verde); }
 .etiqueta--artesanias { color: #8b3a62; }
 .etiqueta--frutas     { color: #b23a2e; }
 .etiqueta--aromaticas { color: #6a4c93; }
+
+.etiqueta--estatica { position: static; display: inline-block; border: 1px solid var(--borde); }
+
+/* Aviso de agotado (tarjeta y ficha) */
+.sello-agotado {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #9b2c1f;
+    color: var(--blanco);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+/* HU-03: ficha del producto */
+.ficha { padding: 24px 0 48px; }
+.migas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; font-size: .88rem; color: var(--texto-suave); }
+.migas a { color: var(--texto-suave); }
+.ficha__principal { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.ficha__imagen {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radio);
+    background: #eee9dc;
+    box-shadow: var(--sombra);
+}
+.ficha__imagen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ficha__imagen--agotado img { filter: grayscale(.85); opacity: .75; }
+.ficha__nombre { margin: 10px 0 18px; font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.2; }
+.ficha__datos {
+    display: grid;
+    gap: 12px;
+    margin: 0 0 18px;
+    padding: 16px 18px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+}
+.ficha__datos div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ficha__datos dt { color: var(--texto-suave); font-size: .9rem; }
+.ficha__datos dd { margin: 0; font-weight: 600; text-align: right; }
+.ficha__precio { font-size: 1.5rem; color: var(--verde-oscuro); }
+.disponibilidad { color: var(--verde); }
+.disponibilidad--agotado { color: #9b2c1f; }
+.ficha__descripcion { margin: 0 0 18px; }
+.productor { padding-top: 14px; border-top: 1px solid var(--borde); }
+.productor h2 { margin: 0 0 4px; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-suave); }
+.productor__nombre { margin: 0; font-weight: 600; }
+.productor__detalle { margin: 2px 0 0; color: var(--texto-suave); font-size: .9rem; }
+.ficha__secciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 36px; }
+.ficha__seccion {
+    padding: 18px 20px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+}
+.ficha__seccion h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--verde-oscuro); }
+.ficha__seccion ul { margin: 0; padding-left: 18px; }
+.ficha__seccion li + li { margin-top: 6px; }
+.pendiente { margin: 0; color: var(--texto-suave); font-style: italic; }
+.ficha__volver { margin-top: 28px; }
+
+@media (max-width: 760px) {
+    .ficha__principal { grid-template-columns: 1fr; gap: 20px; }
+}
 
 .vacio { text-align: center; padding: 64px 16px; color: var(--texto-suave); }
 .vacio__titulo { font-size: 1.15rem; font-weight: 600; color: var(--texto); }
