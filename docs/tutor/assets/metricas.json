@@ -1,0 +1,141 @@
+{
+  "ruta": "C:\\claudeVs_App\\merca_tecam_web",
+  "archivos": 5,
+  "funciones": 53,
+  "ccn_medio": 2.91,
+  "funciones_ccn_mayor_10": 2,
+  "funciones_nloc_mayor_40": 2,
+  "ciclos_entre_modulos": [],
+  "puntajes": {
+    "Complejidad media": 7.1,
+    "Funciones simples": 9.6,
+    "Funciones cortas": 9.6,
+    "Pocos parámetros": 10.0,
+    "Bajo acoplamiento": 10.0
+  },
+  "puntaje_general": 9.3,
+  "nota_puntaje": "Orientativo. Cada ciclo entre módulos resta 4 en acoplamiento y 1.5 al general. No detecta errores de ejecución ni riesgos de negocio: confírmalo leyendo el código.",
+  "top_complejas": [
+    {
+      "archivo": "scripts\\importar_productos.php",
+      "funcion": "parsearNumero",
+      "linea": 177,
+      "ccn": 12,
+      "nloc": 20,
+      "params": 1
+    },
+    {
+      "archivo": "scripts\\importar_productos.php",
+      "funcion": "prepararImagen",
+      "linea": 216,
+      "ccn": 11,
+      "nloc": 42,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "(anonymous)",
+      "linea": 77,
+      "ccn": 10,
+      "nloc": 27,
+      "params": 0
+    },
+    {
+      "archivo": "src\\Database.php",
+      "funcion": "Database::connection",
+      "linea": 12,
+      "ccn": 7,
+      "nloc": 41,
+      "params": 0
+    },
+    {
+      "archivo": "src\\ProductRepository.php",
+      "funcion": "ProductRepository::listarCatalogo",
+      "linea": 18,
+      "ccn": 7,
+      "nloc": 36,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "(anonymous)",
+      "linea": 189,
+      "ccn": 6,
+      "nloc": 10,
+      "params": 1
+    },
+    {
+      "archivo": "scripts\\importar_productos.php",
+      "funcion": "leerCsv",
+      "linea": 128,
+      "ccn": 5,
+      "nloc": 22,
+      "params": 1
+    },
+    {
+      "archivo": "src\\helpers.php",
+      "funcion": "url_catalogo",
+      "linea": 69,
+      "ccn": 5,
+      "nloc": 5,
+      "params": 1
+    },
+    {
+      "archivo": "src\\ProductRepository.php",
+      "funcion": "ProductRepository::obtenerPorId",
+      "linea": 66,
+      "ccn": 5,
+      "nloc": 36,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "(anonymous)",
+      "linea": 224,
+      "ccn": 5,
+      "nloc": 10,
+      "params": 1
+    },
+    {
+      "archivo": "scripts\\importar_productos.php",
+      "funcion": "corregirOrientacion",
+      "linea": 200,
+      "ccn": 4,
+      "nloc": 14,
+      "params": 1
+    },
+    {
+      "archivo": "src\\helpers.php",
+      "funcion": "imagen_producto",
+      "linea": 19,
+      "ccn": 4,
+      "nloc": 7,
+      "params": 1
+    },
+    {
+      "archivo": "src\\helpers.php",
+      "funcion": "query_param",
+      "linea": 58,
+      "ccn": 4,
+      "nloc": 9,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "leer",
+      "linea": 16,
+      "ccn": 4,
+      "nloc": 16,
+      "params": 0
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "cambiarCantidad",
+      "linea": 121,
+      "ccn": 4,
+      "nloc": 8,
+      "params": 2
+    }
+  ],
+  "dependencias": []
+}
