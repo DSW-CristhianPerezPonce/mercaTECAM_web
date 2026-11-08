@@ -11,7 +11,7 @@ classDiagram
         +connection() PDO
     }
     class ProductRepository {
-        -PDO pdo
+        -PDO db
         +listarCatalogo() array
         +obtenerPorId() array
         +obtenerParaCarrito() array

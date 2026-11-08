@@ -42,7 +42,7 @@ Formato: severidad | archivo:línea | principio | por qué importa | propuesta.
 - baja | `src/ProductRepository.php:69`, `:115` | Números mágicos | `2147483647` duplicado | constante `ID_MAXIMO`.
 - baja | `scripts/importar_productos.php:95-96` | Claridad | `?? null ?: null` es difícil de leer y trata "0" como vacío | `vacioANulo()` (refactor 6).
 - baja | `scripts/importar_productos.php:177` | Heurística sin tests | `parsearNumero` decide qué es "1.500" (miles o decimal) | tests de tabla.
-- baja | `scripts/importar_productos.php:258` (~) | Número mágico | `300*1024` | constante nombrada.
+- baja | `scripts/importar_productos.php:257` | Número mágico | `300*1024` | constante nombrada.
 - baja | `router.php:7` | Defensivo | `$_SERVER['REQUEST_URI']` sin `?? '/'`, a diferencia de `api/index.php:7` | añadir el valor por defecto.
 - baja | varios | Convención | mezcla de snake_case (helpers) y camelCase (métodos) | decidir y documentar.
 - baja | plantillas de catálogo, ficha y carrito | DRY | la regla "agotado" se repite en 3 plantillas | un helper o parcial.
