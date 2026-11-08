@@ -3,8 +3,25 @@ declare(strict_types=1);
 
 final class ProductRepository
 {
+    /** productos.id es SERIAL (INTEGER de PostgreSQL): fuera de este rango no puede existir. */
+    private const ID_MAXIMO = 2147483647;
+
     public function __construct(private PDO $db)
     {
+    }
+
+    private static function idValido(int $id): bool
+    {
+        return $id >= 1 && $id <= self::ID_MAXIMO;
+    }
+
+    /** PDO devuelve NUMERIC como texto: se tipan aquí, en un solo lugar, los campos numéricos. */
+    private static function hidratar(array $r): array
+    {
+        $r['id']                = (int) $r['id'];
+        $r['precio_referencia'] = (float) $r['precio_referencia'];
+        $r['disponibilidad']    = (int) $r['disponibilidad'];
+        return $r;
     }
 
     /**
@@ -50,12 +67,7 @@ final class ProductRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return array_map(static function (array $r): array {
-            $r['id']                = (int) $r['id'];
-            $r['precio_referencia'] = (float) $r['precio_referencia'];
-            $r['disponibilidad']    = (int) $r['disponibilidad'];
-            return $r;
-        }, $stmt->fetchAll());
+        return array_map(self::hidratar(...), $stmt->fetchAll());
     }
 
     /**
@@ -65,8 +77,7 @@ final class ProductRepository
      */
     public function obtenerPorId(int $id): ?array
     {
-        // productos.id es SERIAL (INTEGER de PostgreSQL); fuera de rango no puede existir.
-        if ($id < 1 || $id > 2147483647) {
+        if (!self::idValido($id)) {
             return null;
         }
 
@@ -93,14 +104,8 @@ final class ProductRepository
         );
         $stmt->execute(['id' => $id]);
         $r = $stmt->fetch();
-        if ($r === false) {
-            return null;
-        }
 
-        $r['id']                = (int) $r['id'];
-        $r['precio_referencia'] = (float) $r['precio_referencia'];
-        $r['disponibilidad']    = (int) $r['disponibilidad'];
-        return $r;
+        return $r === false ? null : self::hidratar($r);
     }
 
     /**
@@ -112,7 +117,7 @@ final class ProductRepository
      */
     public function obtenerParaCarrito(array $ids): array
     {
-        $ids = array_values(array_unique(array_filter($ids, static fn ($id) => $id >= 1 && $id <= 2147483647)));
+        $ids = array_values(array_unique(array_filter($ids, self::idValido(...))));
         if ($ids === []) {
             return [];
         }
@@ -123,16 +128,14 @@ final class ProductRepository
                     pr.nombre AS productor
                FROM productos p
                JOIN productores pr ON pr.id = p.productor_id
-              WHERE p.activo = TRUE AND p.id IN ($marcas)
-              ORDER BY p.nombre"
+              WHERE p.activo = TRUE AND p.id IN ($marcas)"
         );
         $stmt->execute($ids);
 
+        // Sin ORDER BY: el navegador indexa por id y ordena la lista él mismo.
         return array_map(static function (array $r): array {
-            $r['id']                = (int) $r['id'];
-            $r['precio_referencia'] = (float) $r['precio_referencia'];
-            $r['disponibilidad']    = (int) $r['disponibilidad'];
-            $r['imagen']            = imagen_producto($r['imagen']);
+            $r = self::hidratar($r);
+            $r['imagen'] = imagen_producto($r['imagen']);
             return $r;
         }, $stmt->fetchAll());
     }

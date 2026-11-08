@@ -23,7 +23,10 @@ try {
 
     // HU-04: datos vigentes de los productos del carrito (?ids=1,2,3). El carrito vive en el navegador.
     if ($method === 'GET' && $path === '/api/carrito') {
-        $ids = array_slice(array_map('intval', explode(',', query_param('ids', 500) ?? '')), 0, 50);
+        // 50 ids de hasta 10 dígitos + comas caben en 600 caracteres. Solo se aceptan tokens enteros
+        // completos: un id cortado o con basura se descarta en vez de convertirse en otro id.
+        $tokens = explode(',', query_param('ids', 600) ?? '');
+        $ids = array_slice(array_map('intval', array_filter($tokens, static fn ($t) => preg_match('/^[1-9]\d{0,9}$/', $t) === 1)), 0, 50);
         $repo = new ProductRepository(Database::connection());
         json_response(['data' => $repo->obtenerParaCarrito($ids)]);
         return;

@@ -5,7 +5,8 @@
         <p class="vacio">Para usar el carrito necesitas activar JavaScript en tu navegador.</p>
     </noscript>
 
-    <p class="carrito__cargando" data-carrito-estado>Cargando tu carrito…</p>
+    <?php // Oculto por defecto: carrito.js lo muestra mientras carga (sin JS solo se ve el <noscript>). ?>
+    <p class="carrito__cargando" data-carrito-estado role="status" hidden>Cargando tu carrito…</p>
 
     <div class="vacio" data-carrito-vacio hidden>
         <p class="vacio__titulo">Tu carrito está vacío.</p>
@@ -17,6 +18,7 @@
 
         <aside class="carrito__resumen" aria-labelledby="titulo-resumen">
             <h2 id="titulo-resumen">Resumen</h2>
+            <ul class="resumen__lista" role="list" data-carrito-resumen-lista></ul>
             <dl>
                 <div><dt>Productos</dt><dd data-carrito-unidades>0</dd></div>
                 <div class="carrito__total"><dt>Total de referencia</dt><dd data-carrito-total aria-live="polite">$ 0</dd></div>
@@ -38,8 +40,9 @@
             <p class="item-carrito__aviso" hidden></p>
         </div>
         <div class="cantidad" role="group">
+            <?php // aria-disabled (no disabled): un botón deshabilitado pierde el foco del teclado. ?>
             <button type="button" class="cantidad__boton" data-accion="bajar" aria-label="Disminuir cantidad">−</button>
-            <input class="cantidad__campo" type="number" min="1" step="1" inputmode="numeric" data-accion="fijar">
+            <input class="cantidad__campo" type="number" min="0" step="1" inputmode="numeric" data-accion="fijar">
             <button type="button" class="cantidad__boton" data-accion="subir" aria-label="Aumentar cantidad">+</button>
         </div>
         <p class="item-carrito__subtotal"></p>

@@ -12,9 +12,10 @@
         <div class="contenedor encabezado__fila">
             <a class="marca" href="/">merca<span>TECAM</span></a>
             <p class="encabezado__lema">Del campo agroecológico a tu mesa</p>
-            <a class="carrito-enlace" href="/carrito">
+            <?php // aria-label en el enlace (no en el <span>, que muchos lectores ignoran); carrito.js lo actualiza. ?>
+            <a class="carrito-enlace" href="/carrito" data-carrito-enlace aria-label="Carrito">
                 <span aria-hidden="true">🧺</span> Carrito
-                <span class="carrito-enlace__contador" data-carrito-contador aria-label="productos en el carrito">0</span>
+                <span class="carrito-enlace__contador" data-carrito-contador aria-hidden="true">0</span>
             </a>
         </div>
     </header>

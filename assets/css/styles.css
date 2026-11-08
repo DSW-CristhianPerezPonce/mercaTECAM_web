@@ -306,7 +306,8 @@ a { color: var(--verde); }
     font: inherit; font-size: 1.15rem; font-weight: 700;
     color: var(--verde-oscuro); background: none; border: 0; border-radius: 999px; cursor: pointer;
 }
-.cantidad__boton:disabled { color: #c3c0b5; cursor: not-allowed; }
+.cantidad__boton:disabled,
+.cantidad__boton[aria-disabled="true"] { color: #c3c0b5; cursor: not-allowed; }
 .cantidad__campo {
     width: 52px; padding: 8px 4px;
     font: inherit; text-align: center;
@@ -344,6 +345,16 @@ a { color: var(--verde); }
     border-radius: var(--radio);
 }
 .carrito__resumen h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.resumen__lista {
+    list-style: none; margin: 0 0 12px; padding: 0 0 12px;
+    display: grid; gap: 8px;
+    border-bottom: 1px solid var(--borde);
+    font-size: .9rem;
+}
+.resumen__item { display: flex; justify-content: space-between; gap: 12px; }
+.resumen__producto { min-width: 0; }
+.resumen__cantidad { display: block; color: var(--texto-suave); font-size: .82rem; }
+.resumen__subtotal { font-weight: 600; white-space: nowrap; }
 .carrito__resumen dl { margin: 0 0 12px; display: grid; gap: 8px; }
 .carrito__resumen dl div { display: flex; justify-content: space-between; }
 .carrito__resumen dd { margin: 0; font-weight: 600; }

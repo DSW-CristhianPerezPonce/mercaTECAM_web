@@ -54,8 +54,11 @@
         var n = totalUnidades(carrito || leer());
         document.querySelectorAll('[data-carrito-contador]').forEach(function (el) {
             el.textContent = n;
-            el.setAttribute('aria-label', n === 1 ? '1 producto en el carrito' : n + ' productos en el carrito');
             el.classList.toggle('carrito-enlace__contador--lleno', n > 0);
+        });
+        // El nombre accesible va en el enlace: un aria-label en un <span> lo ignoran muchos lectores.
+        document.querySelectorAll('[data-carrito-enlace]').forEach(function (el) {
+            el.setAttribute('aria-label', 'Carrito: ' + (n === 1 ? '1 producto' : n + ' productos'));
         });
     }
 
@@ -108,9 +111,14 @@
     // ---------- Página /carrito ----------
     function iniciarPaginaCarrito(raiz) {
         var productos = {}; // id → datos vigentes del servidor
+        var items = {};     // id → <li> ya pintado; se actualiza en su lugar para no perder el foco
         var lista = raiz.querySelector('[data-carrito-lista]');
+        var resumen = raiz.querySelector('[data-carrito-resumen-lista]');
         var plantilla = document.getElementById('plantilla-item-carrito');
         var estado = raiz.querySelector('[data-carrito-estado]');
+        var titulo = raiz.querySelector('h1');
+        var cargando = false;
+        var pendiente = false;
 
         function mostrar(seccion) {
             estado.hidden = seccion !== 'estado';
@@ -118,27 +126,111 @@
             raiz.querySelector('[data-carrito-contenido]').hidden = seccion !== 'contenido';
         }
 
+        function enfocar(el) {
+            if (!el) return;
+            if (!el.matches('a, button, input')) el.setAttribute('tabindex', '-1');
+            el.focus();
+        }
+
+        function nombreDe(id) {
+            return productos[id] ? '«' + productos[id].nombre + '»' : 'El producto';
+        }
+
+        // Fija la cantidad de un producto: 0 lo quita; por encima de la disponibilidad se ajusta y se avisa.
         function cambiarCantidad(id, cantidad) {
             var carrito = leer();
-            var max = productos[id] ? productos[id].disponibilidad : 0;
-            cantidad = Math.min(Math.max(1, cantidad || 1), max);
-            if (cantidad > 0) carrito[id] = cantidad; else delete carrito[id];
+            if (!carrito[id] || !productos[id] || isNaN(cantidad)) {
+                pintar(); // lo quitaron en otra pestaña o el campo quedó vacío: se muestra el estado real
+                return;
+            }
+            if (cantidad <= 0) {
+                quitar(id);
+                return;
+            }
+            var max = productos[id].disponibilidad;
+            if (cantidad > max) {
+                cantidad = max;
+                avisar('Solo hay ' + max + ' disponibles de ' + nombreDe(id) + '; ajustamos la cantidad.');
+            }
+            carrito[id] = cantidad;
             guardar(carrito);
             pintar();
         }
 
         function quitar(id) {
+            var item = items[id];
+            var teniaFoco = item && item.contains(document.activeElement);
+            var vecino = item && (item.nextElementSibling || item.previousElementSibling);
+            var nombre = nombreDe(id);
             var carrito = leer();
             delete carrito[id];
             guardar(carrito);
             pintar();
-            avisar('Producto quitado del carrito.');
+            // El foco pasa al producto vecino (o al título si el carrito quedó vacío) en vez de perderse.
+            if (teniaFoco) enfocar(vecino && vecino.isConnected ? vecino.querySelector('[data-accion="quitar"]') : titulo);
+            avisar(nombre + ' quitado del carrito.');
+        }
+
+        function crearItem(id) {
+            var item = plantilla.content.firstElementChild.cloneNode(true);
+            item.dataset.id = id;
+            item.querySelector('.item-carrito__nombre').href = '/producto/' + id;
+            return item;
+        }
+
+        function actualizarItem(item, p, cantidad, subtotal) {
+            var img = item.querySelector('.item-carrito__imagen');
+            if (img.getAttribute('src') !== p.imagen) img.src = p.imagen; // no recarga la foto en cada cambio
+            item.querySelector('.item-carrito__nombre').textContent = p.nombre;
+            item.querySelector('.item-carrito__detalle').textContent =
+                precio(p.precio_referencia) + ' / ' + p.unidad + ' · ' + p.productor;
+
+            var campo = item.querySelector('.cantidad__campo');
+            campo.value = cantidad;
+            campo.max = p.disponibilidad;
+            campo.setAttribute('aria-label', 'Cantidad de ' + p.nombre);
+            item.querySelector('[data-accion="bajar"]').setAttribute('aria-disabled', String(cantidad <= 1));
+            item.querySelector('[data-accion="subir"]').setAttribute('aria-disabled', String(cantidad >= p.disponibilidad));
+            item.querySelector('[data-accion="quitar"]').setAttribute('aria-label', 'Quitar ' + p.nombre + ' del carrito');
+
+            var aviso = item.querySelector('.item-carrito__aviso');
+            aviso.hidden = cantidad < p.disponibilidad;
+            aviso.textContent = aviso.hidden ? '' : 'Máximo disponible: ' + p.disponibilidad;
+            item.querySelector('.item-carrito__subtotal').textContent = precio(subtotal);
+        }
+
+        // Línea del resumen: nombre, cantidad × precio unitario y subtotal.
+        function crearLineaResumen(p, cantidad, subtotal) {
+            var li = document.createElement('li');
+            li.className = 'resumen__item';
+            var producto = document.createElement('span');
+            producto.className = 'resumen__producto';
+            producto.textContent = p.nombre;
+            var detalle = document.createElement('span');
+            detalle.className = 'resumen__cantidad';
+            detalle.textContent = cantidad + ' × ' + precio(p.precio_referencia) + ' / ' + p.unidad;
+            producto.appendChild(detalle);
+            var valor = document.createElement('span');
+            valor.className = 'resumen__subtotal';
+            valor.textContent = precio(subtotal);
+            li.appendChild(producto);
+            li.appendChild(valor);
+            return li;
         }
 
         // Recalcula subtotales y total a partir del estado guardado y los precios vigentes.
+        // Los <li> existentes se actualizan en su lugar; solo se crean o quitan los que cambian.
         function pintar() {
             var carrito = leer();
             var ids = Object.keys(carrito).filter(function (id) { return productos[id]; });
+            ids.sort(function (a, b) { return productos[a].nombre.localeCompare(productos[b].nombre, 'es'); });
+
+            Object.keys(items).forEach(function (id) {
+                if (ids.indexOf(id) === -1) {
+                    items[id].remove();
+                    delete items[id];
+                }
+            });
             if (ids.length === 0) {
                 mostrar('vacio');
                 return;
@@ -146,39 +238,18 @@
 
             var total = 0;
             var unidades = 0;
-            lista.textContent = '';
-            ids.sort(function (a, b) { return productos[a].nombre.localeCompare(productos[b].nombre, 'es'); });
-            ids.forEach(function (id) {
+            resumen.textContent = '';
+            ids.forEach(function (id, i) {
                 var p = productos[id];
                 var cantidad = carrito[id];
                 var subtotal = p.precio_referencia * cantidad;
                 total += subtotal;
                 unidades += cantidad;
 
-                var item = plantilla.content.firstElementChild.cloneNode(true);
-                item.dataset.id = id;
-                var img = item.querySelector('.item-carrito__imagen');
-                img.src = p.imagen;
-                var enlace = item.querySelector('.item-carrito__nombre');
-                enlace.textContent = p.nombre;
-                enlace.href = '/producto/' + id;
-                item.querySelector('.item-carrito__detalle').textContent =
-                    precio(p.precio_referencia) + ' / ' + p.unidad + ' · ' + p.productor;
-
-                var campo = item.querySelector('.cantidad__campo');
-                campo.value = cantidad;
-                campo.max = p.disponibilidad;
-                campo.setAttribute('aria-label', 'Cantidad de ' + p.nombre);
-                item.querySelector('[data-accion="bajar"]').disabled = cantidad <= 1;
-                item.querySelector('[data-accion="subir"]').disabled = cantidad >= p.disponibilidad;
-                item.querySelector('[data-accion="quitar"]').setAttribute('aria-label', 'Quitar ' + p.nombre + ' del carrito');
-                if (cantidad >= p.disponibilidad) {
-                    var aviso = item.querySelector('.item-carrito__aviso');
-                    aviso.textContent = 'Máximo disponible: ' + p.disponibilidad;
-                    aviso.hidden = false;
-                }
-                item.querySelector('.item-carrito__subtotal').textContent = precio(subtotal);
-                lista.appendChild(item);
+                var item = items[id] || (items[id] = crearItem(id));
+                if (lista.children[i] !== item) lista.insertBefore(item, lista.children[i] || null);
+                actualizarItem(item, p, cantidad, subtotal);
+                resumen.appendChild(crearLineaResumen(p, cantidad, subtotal));
             });
 
             raiz.querySelector('[data-carrito-unidades]').textContent = unidades;
@@ -186,9 +257,70 @@
             mostrar('contenido');
         }
 
+        // Trae del servidor los productos del carrito (todos, o solo los que aún no conocemos)
+        // y depura los retirados, agotados o con más cantidad que la disponible.
+        function cargar(todos) {
+            var ids = Object.keys(leer()).filter(function (id) { return todos || !productos[id]; });
+            if (ids.length === 0) {
+                pintar();
+                return;
+            }
+            if (cargando) {
+                pendiente = true;
+                return;
+            }
+            cargando = true;
+            if (Object.keys(items).length === 0) {
+                estado.textContent = 'Cargando tu carrito…';
+                mostrar('estado');
+            }
+
+            fetch('/api/carrito?ids=' + ids.join(','), { headers: { Accept: 'application/json' } })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function (json) {
+                    json.data.forEach(function (p) { productos[p.id] = p; });
+                    // Se relee el carrito: pudo cambiar en otra pestaña mientras llegaba la respuesta.
+                    var carrito = leer();
+                    var cambios = [];
+                    ids.forEach(function (id) {
+                        var p = productos[id];
+                        if (!carrito[id]) return;
+                        if (!p || p.disponibilidad <= 0) {
+                            cambios.push(p ? '«' + p.nombre + '» se agotó' : 'un producto ya no está publicado');
+                            delete carrito[id];
+                            delete productos[id]; // si vuelve a agregarse, se consulta de nuevo
+                        } else if (carrito[id] > p.disponibilidad) {
+                            cambios.push('ajustamos «' + p.nombre + '» a ' + p.disponibilidad + ' (disponibilidad actual)');
+                            carrito[id] = p.disponibilidad;
+                        }
+                    });
+                    if (cambios.length) guardar(carrito);
+                    pintar();
+                    if (cambios.length) avisar('Actualizamos tu carrito: ' + cambios.join('; ') + '.');
+                })
+                .catch(function () {
+                    if (Object.keys(items).length) {
+                        avisar('No pudimos actualizar los precios del carrito. Intenta de nuevo en unos minutos.');
+                    } else {
+                        estado.textContent = 'No pudimos cargar los precios del carrito. Intenta de nuevo en unos minutos.';
+                        mostrar('estado');
+                    }
+                })
+                .then(function () {
+                    cargando = false;
+                    if (pendiente) {
+                        pendiente = false;
+                        cargar(false);
+                    }
+                });
+        }
+
         lista.addEventListener('click', function (ev) {
             var boton = ev.target.closest('button[data-accion]');
-            if (!boton) return;
+            if (!boton || boton.getAttribute('aria-disabled') === 'true') return;
             var id = boton.closest('.item-carrito').dataset.id;
             var actual = leer()[id] || 0;
             var accion = boton.getAttribute('data-accion');
@@ -203,50 +335,35 @@
         raiz.querySelector('[data-carrito-vaciar]').addEventListener('click', function () {
             guardar({});
             pintar();
+            enfocar(titulo);
             avisar('Carrito vaciado.');
         });
 
-        // Carga inicial: trae datos vigentes y depura productos retirados o sin existencias.
-        var carrito = leer();
-        var ids = Object.keys(carrito);
-        if (ids.length === 0) {
-            mostrar('vacio');
-            return;
-        }
-        fetch('/api/carrito?ids=' + ids.join(','), { headers: { Accept: 'application/json' } })
-            .then(function (r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(function (json) {
-                json.data.forEach(function (p) { productos[p.id] = p; });
-                var cambios = [];
-                ids.forEach(function (id) {
-                    var p = productos[id];
-                    if (!p || p.disponibilidad <= 0) {
-                        cambios.push(p ? '«' + p.nombre + '» se agotó' : 'un producto ya no está publicado');
-                        delete carrito[id];
-                    } else if (carrito[id] > p.disponibilidad) {
-                        cambios.push('ajustamos «' + p.nombre + '» a ' + p.disponibilidad + ' (disponibilidad actual)');
-                        carrito[id] = p.disponibilidad;
-                    }
-                });
-                guardar(carrito);
-                pintar();
-                if (cambios.length) avisar('Actualizamos tu carrito: ' + cambios.join('; ') + '.');
-            })
-            .catch(function () {
-                estado.textContent = 'No pudimos cargar los precios del carrito. Intenta de nuevo en unos minutos.';
-            });
-    }
+        cargar(true);
 
-    // Sincroniza el contador si el carrito cambia en otra pestaña.
-    window.addEventListener('storage', function (ev) {
-        if (ev.key === CLAVE) actualizarContador();
-    });
+        return {
+            sincronizar: function () { cargar(false); }, // cambio en otra pestaña
+            recargar: function () { cargar(true); }      // página restaurada desde la caché del navegador
+        };
+    }
 
     actualizarContador();
     activarBotones();
     var raiz = document.querySelector('[data-carrito]');
-    if (raiz) iniciarPaginaCarrito(raiz);
+    var paginaCarrito = raiz ? iniciarPaginaCarrito(raiz) : null;
+
+    // Otra pestaña cambió el carrito (key null = se borró todo el almacenamiento del sitio).
+    window.addEventListener('storage', function (ev) {
+        if (ev.key !== CLAVE && ev.key !== null) return;
+        actualizarContador();
+        if (paginaCarrito) paginaCarrito.sincronizar();
+    });
+
+    // Con «Atrás»/«Adelante» el navegador puede restaurar la página desde su caché (bfcache)
+    // tal como estaba: se vuelven a leer el carrito y los datos vigentes.
+    window.addEventListener('pageshow', function (ev) {
+        if (!ev.persisted) return;
+        actualizarContador();
+        if (paginaCarrito) paginaCarrito.recargar();
+    });
 })();
