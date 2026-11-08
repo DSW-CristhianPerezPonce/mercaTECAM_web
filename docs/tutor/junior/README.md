@@ -8,8 +8,8 @@ mercaTECAM es una tienda en línea donde campesinos y asociaciones agroecológic
 
 Piensa en una **plaza de mercado**:
 
-- `api/index.php` es la **portería**: todo el que entra pasa por ahí y alguien le dice a qué puesto ir (`api/index.php:15-76`).
-- `ProductRepository` es el **bodeguero**: es el único que sabe buscar en la bodega (la base de datos) y trae lo que le pidan (`src/ProductRepository.php:18`).
+- `api/index.php` es la **portería**: todo el que entra pasa por ahí y alguien le dice a qué puesto ir (`api/index.php:15-79`).
+- `ProductRepository` es el **bodeguero**: es el único que sabe buscar en la bodega (la base de datos) y trae lo que le pidan (`src/ProductRepository.php:35`).
 - Las plantillas de `templates/` son el **escaparate**: arman cómo se ve lo que trajo el bodeguero.
 - `carrito.js` es la **canasta que lleva el cliente en la mano**: la guarda el propio navegador, no la tienda (`assets/js/carrito.js:36`).
 
@@ -40,11 +40,11 @@ Necesitas PHP 8 y una variable `DATABASE_URL` (en un archivo `.env` local) que a
 
 ## 5. Dónde empezar a leer
 
-1. `api/index.php:5` y `api/index.php:15-76`: el arranque y las "ramas" por dirección.
+1. `api/index.php:5` y `api/index.php:15-79`: el arranque y las "ramas" por dirección.
 2. `src/bootstrap.php:23-25`: qué archivos se cargan al inicio.
-3. `src/ProductRepository.php:18`: cómo se piden los productos a la base.
+3. `src/ProductRepository.php:35`: cómo se piden los productos a la base.
 4. `src/helpers.php:49`: cómo se arma una página (`render`).
-5. `assets/js/carrito.js:77-104`: qué pasa al pulsar "Agregar al carrito".
+5. `assets/js/carrito.js:80-107`: qué pasa al pulsar "Agregar al carrito".
 
 ## Vista general de módulos
 
@@ -56,9 +56,9 @@ Necesitas PHP 8 y una variable `DATABASE_URL` (en un archivo `.env` local) que a
 
 ### Tres buenas prácticas que ya están en el código
 
-1. **Consultas preparadas**: los datos del usuario nunca se pegan en el SQL, se pasan aparte (`src/ProductRepository.php:30-31`, y `EMULATE_PREPARES=false` en `src/Database.php:54-56`).
+1. **Consultas preparadas**: los datos del usuario nunca se pegan en el SQL, se pasan aparte (`src/ProductRepository.php:47-48`, y `EMULATE_PREPARES=false` en `src/Database.php:54-56`).
 2. **Escapar antes de mostrar**: todo texto pasa por `e()` para que nadie inyecte HTML (`src/helpers.php:7`).
-3. **Funciona sin JavaScript**: filtros y búsqueda son enlaces normales; el botón de agregar nace `disabled` y el JS lo activa (`templates/partials/boton-agregar.php:11`, `templates/layout.php:30`).
+3. **Funciona sin JavaScript**: filtros y búsqueda son enlaces normales; el botón de agregar nace `disabled` y el JS lo activa (`templates/partials/boton-agregar.php:11`, `templates/layout.php:31`).
 
 ### Preguntas de comprobación
 
@@ -67,9 +67,9 @@ Necesitas PHP 8 y una variable `DATABASE_URL` (en un archivo `.env` local) que a
 
 ### Ejercicio
 
-Agrega un campo opcional `origen_vereda` a un producto: añádelo en `database/schema.sql`, léelo en `ProductRepository::obtenerPorId` (`src/ProductRepository.php:66`) y muéstralo en la plantilla de la ficha. Después corre `php scripts/migrar.php` y `php -l` sobre cada archivo tocado.
+Agrega un campo opcional `origen_vereda` a un producto: añádelo en `database/schema.sql`, léelo en `ProductRepository::obtenerPorId` (`src/ProductRepository.php:78`) y muéstralo en la plantilla de la ficha. Después corre `php scripts/migrar.php` y `php -l` sobre cada archivo tocado.
 
 ### Respuestas
 
 1. El equipo decidió que el carrito viva en el navegador (`localStorage`) porque aún no hay usuarios ni pedidos; ver [ADR-0002](../senior/adr/0002-carrito-en-navegador.md).
-2. El JS pregunta nombres, precios y disponibilidad a `GET /api/carrito?ids=` (`assets/js/carrito.js:216`), y esa ruta sí consulta la base (`api/index.php:25-30`).
+2. El JS pregunta nombres, precios y disponibilidad a `GET /api/carrito?ids=` (`assets/js/carrito.js:278`), y esa ruta sí consulta la base (`api/index.php:25-33`).

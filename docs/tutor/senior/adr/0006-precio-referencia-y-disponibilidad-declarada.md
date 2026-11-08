@@ -7,7 +7,7 @@ Este ADR documenta una decisión **implícita** en el código y propone fijarla 
 ## Contexto
 
 - Hechos: el producto guarda `precio_referencia` (CHECK >= 0, `database/schema.sql:25`) y `disponibilidad` (CHECK >= 0, `database/schema.sql:27`). El Excel de origen lo llama "Precio Estimado (COP)" (`data/productos.csv`).
-- El carrito suma precio por cantidad en el navegador (`assets/js/carrito.js:48` formatea; la lógica de total está en el JS), y recorta la cantidad a la disponibilidad (`assets/js/carrito.js:93`).
+- El carrito suma precio por cantidad en el navegador (`assets/js/carrito.js:48` formatea; subtotales y total en `pintar()`, `:223-258`) y lo muestra línea por línea en el resumen como cantidad × precio de referencia (`:203`). Recorta la cantidad a la disponibilidad al agregar (`:97`) y al editarla (`:150-153`).
 - El importador sobrescribe la disponibilidad al reimportar (`scripts/importar_productos.php:75-118`; hipótesis por el upsert).
 - No existe reserva de inventario ni pedido.
 
@@ -29,5 +29,5 @@ Pendiente. **Propuesta** a debatir: mientras no haya checkout, mantener el estad
 
 - **Si se mantiene A**: riesgo reputacional y legal por expectativas de precio; carrera entre compradores por la misma disponibilidad (sin reserva).
 - **Si se elige B o D**: hay que construir en servidor las reglas hoy solo presentes en JS (ver [ADR-0002](0002-carrito-en-navegador.md)), un contexto de Pedidos e Inventario, y cambiar el importador para que no sobrescriba reservas.
-- **Riesgos**: dinero como `float` (`src/ProductRepository.php:54`) frente a `NUMERIC(12,2)`; unidades libres sin conversión.
+- **Riesgos**: dinero como `float` (`src/ProductRepository.php:22`) frente a `NUMERIC(12,2)`; unidades libres sin conversión.
 - Preguntas para negocio: ¿precio vinculante?, ¿disponibilidad es stock o capacidad?, ¿cantidades fraccionarias?, ¿se compra a mercaTECAM o a cada productor? Respuestas: pendiente de confirmar.

@@ -4,7 +4,7 @@ Seis refactors ordenados por relación valor/esfuerzo. No hay suite de tests: la
 
 ## 1. Repositorio único y perezoso en el front controller
 
-**Antes** (`api/index.php:16`, `:27`, `:41`, `:56`):
+**Antes** (`api/index.php:16`, `:30`, `:44`, `:59`):
 
 ```php
 $repo = new ProductRepository(Database::connection());
@@ -22,14 +22,16 @@ $repo = static function (): ProductRepository {
 // uso: $repo()->listarCatalogo($categoria, $busqueda)
 ```
 
-- **Principio**: DRY y KISS; la creación perezosa evita abrir conexión en rutas que no la necesitan (`/carrito` es solo un shell, `api/index.php:32`).
+- **Principio**: DRY y KISS; la creación perezosa evita abrir conexión en rutas que no la necesitan (`/carrito` es solo un shell, `api/index.php:35`).
 - **Riesgo**: bajo. El `static` dentro de la closure se comparte solo en esa closure.
 - **Comprobación**: abrir `/carrito` con `DATABASE_URL` inválida (debería responder 200) y `/` con la URL válida.
 - **Esfuerzo**: S.
 
 ## 2. Tipado de filas en un método privado y constante de id máximo
 
-**Antes** (`src/ProductRepository.php:53-57` y `:131-136`):
+> **Aplicado** en el commit `5593565`: `ID_MAXIMO` (`src/ProductRepository.php:7`), `idValido()` (`:13-16`) e `hidratar()` (`:19-25`). Se conserva aquí como ejemplo resuelto. Lo que **no** se hizo: sacar `imagen_producto()` del repositorio (`:138`).
+
+**Antes** (versión anterior, commit `e696a83`, tres copias en `listarCatalogo`, `obtenerPorId` y `obtenerParaCarrito`):
 
 ```php
 $r['id']                = (int) $r['id'];
@@ -37,9 +39,9 @@ $r['precio_referencia'] = (float) $r['precio_referencia'];
 $r['disponibilidad']    = (int) $r['disponibilidad'];
 ```
 
-Se repite, y el carrito añade `$r['imagen'] = imagen_producto($r['imagen']);`. Además `2147483647` aparece en `:69` y `:115`.
+Se repite, y el carrito añade `$r['imagen'] = imagen_producto($r['imagen']);`. Además `2147483647` aparecía dos veces.
 
-**Después** (propuesta):
+**Después** (lo que quedó en el código):
 
 ```php
 private const ID_MAXIMO = 2147483647;
@@ -51,19 +53,21 @@ private static function hidratar(array $r): array
     $r['disponibilidad']    = (int) $r['disponibilidad'];
     return $r;
 }
-// carrito: return array_map(fn ($r) => self::hidratar($r) + ['imagen' => imagen_producto($r['imagen'])], ...);
+// listarCatalogo: return array_map(self::hidratar(...), $stmt->fetchAll());
+// obtenerPorId:   return $r === false ? null : self::hidratar($r);
+// carrito:        $r = self::hidratar($r); $r['imagen'] = imagen_producto($r['imagen']);
 ```
 
 (Ojo: con `+` gana el arreglo de la izquierda; si se usa `array_merge`, gana el de la derecha. Escoge según el caso y prueba la salida.)
 
-- **Principio**: DRY. De paso conviene mover `imagen_producto` fuera del repositorio (la capa de datos no debe conocer la presentación, `src/ProductRepository.php:131`), por ejemplo hidratando la imagen en el front controller.
+- **Principio**: DRY. De paso conviene mover `imagen_producto` fuera del repositorio (la capa de datos no debe conocer la presentación, `src/ProductRepository.php:138`), por ejemplo hidratando la imagen en el front controller.
 - **Riesgo**: cambia el tipo o el orden de claves del JSON. Hoy solo `/api/carrito` normaliza la imagen; unificarla cambiaría `/api/productos`.
 - **Comprobación**: guardar antes y después la salida de `/api/productos` y `/api/carrito?ids=1,2` y comparar con `diff`.
 - **Esfuerzo**: S.
 
 ## 3. Función pura para agregar al carrito
 
-**Antes** (`assets/js/carrito.js:88-104`, dentro del manejador de clic `:77`): lee DOM, valida, calcula y avisa en la misma función (CCN 10).
+**Antes** (`assets/js/carrito.js:91-107`, dentro del manejador de clic `:80`): lee DOM, valida, calcula y avisa en la misma función (CCN 10).
 
 **Después** (propuesta):
 
@@ -161,7 +165,7 @@ Refactoriza el punto 3 (`calcularAgregado`) y comprueba que los tests siguen pas
 | Refactor | Esfuerzo | Beneficio |
 |---|---|---|
 | 1. Repositorio único y perezoso | S | Menos duplicación; `/carrito` no depende de la base |
-| 2. Tipado en método privado y `ID_MAXIMO` | S | Una sola fuente de verdad del contrato JSON |
+| 2. Tipado en método privado y `ID_MAXIMO` | S (**aplicado**, `5593565`) | Una sola fuente de verdad del contrato JSON |
 | 3. `calcularAgregado` pura | M | Reglas del carrito testeables sin navegador |
 | 4. Dividir `prepararImagen` | M | Importador legible; elimina fallo silencioso |
 | 5. Transacción con rollback | M | Importaciones atómicas |

@@ -9,7 +9,7 @@
 | Unidad | Cómo se vende: libra, frasco, unidad (en el Excel se llama "Presentación"). | columna `unidad` de `data/productos_importar.csv` |
 | Disponibilidad declarada | Cuántas unidades dice tener el productor; no es inventario real. | `database/schema.sql:27` |
 | Agotado | Producto con disponibilidad 0; se calcula, no se guarda. | `templates/partials/boton-agregar.php:12` |
-| Activo | Producto visible en el catálogo; los demás se consideran retirados. | `src/ProductRepository.php:20` |
+| Activo | Producto visible en el catálogo; los demás se consideran retirados. | `src/ProductRepository.php:37` |
 | Categoría y slug | Grupo del producto y su nombre para URL (por ejemplo `verduras`). Hay 6. | `database/schema.sql:9`, `:43-50` |
 | Productor | Persona o finca que ofrece el producto. | `database/schema.sql:15` |
 | Asociación | Organización del productor; hoy es texto libre. | columna `asociacion` de `data/productos_importar.csv` |
@@ -25,15 +25,18 @@
 | vercel-php | Extensión comunitaria para correr PHP en Vercel. | `vercel.json` (runtime `vercel-php@0.7.4`) |
 | Neon | Servicio de PostgreSQL en la nube. | `src/Database.php:44-47` |
 | PDO | Librería de PHP para hablar con bases de datos. | `src/Database.php:54-56` |
-| Consulta preparada | SQL con huecos que se llenan aparte, para evitar inyección SQL. | `src/ProductRepository.php:30-31` |
-| Repositorio | Clase que concentra las consultas de un tipo de dato. | `src/ProductRepository.php:6` |
+| Consulta preparada | SQL con huecos que se llenan aparte, para evitar inyección SQL. | `src/ProductRepository.php:47-48` |
+| Repositorio | Clase que concentra las consultas de un tipo de dato. | `src/ProductRepository.php:9` |
 | Singleton | Un objeto que se crea una sola vez y se reutiliza. | `src/Database.php:6`, `:14-16` |
 | Plantilla | Archivo HTML con PHP para mostrar datos. | `src/helpers.php:49` |
 | Escapar | Convertir caracteres peligrosos en texto inofensivo antes de mostrarlos. | `src/helpers.php:7` |
 | unaccent | Extensión de PostgreSQL que ignora las tildes al buscar. | `database/schema.sql:5` |
-| ILIKE | Comparación de texto sin distinguir mayúsculas. | `src/ProductRepository.php:30` |
+| ILIKE | Comparación de texto sin distinguir mayúsculas. | `src/ProductRepository.php:47` |
 | localStorage | Pequeño almacén del navegador que sobrevive al cerrar la pestaña. | `assets/js/carrito.js:7` |
-| Progressive enhancement | La página sirve sin JS y el JS añade mejoras. | `templates/layout.php:30` |
+| Progressive enhancement | La página sirve sin JS y el JS añade mejoras. | `templates/layout.php:31` |
+| aria-disabled | Marca un botón como no disponible sin quitarle el foco (un `disabled` lo saca del orden del teclado). | `templates/carrito.php:43`, `assets/js/carrito.js:192-193` |
+| bfcache | Caché del navegador que guarda la página entera para «Atrás»/«Adelante»; puede mostrar datos viejos. | `assets/js/carrito.js:364` (`pageshow`) |
+| Evento `storage` | Aviso que recibe una pestaña cuando otra cambia el `localStorage` del mismo sitio. | `assets/js/carrito.js:356` |
 | Upsert | Insertar si no existe o actualizar si existe; permite repetir importaciones. | `scripts/importar_productos.php:75-118` (transacción de importación) |
 | Migración | Script que crea o cambia tablas. | `database/schema.sql` |
 | CSV | Archivo de texto con columnas separadas por `;`. | `data/productos_importar.csv` |

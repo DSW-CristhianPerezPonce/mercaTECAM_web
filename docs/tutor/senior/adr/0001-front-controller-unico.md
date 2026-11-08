@@ -10,7 +10,7 @@
 
 ## Decisión
 
-`api/index.php` es el único punto de entrada; las rutas son ramas `if` por método y ruta (`api/index.php:15`, `:25`, `:32`, `:40`, `:55`), con un `try/catch Throwable` global (`api/index.php:81-91`) y un 404 final (~`:76`).
+`api/index.php` es el único punto de entrada; las rutas son ramas `if` por método y ruta (`api/index.php:15`, `:25`, `:35`, `:43`, `:58`), con un `try/catch Throwable` global (`api/index.php:84-94`) y un 404 final (~`:76`).
 
 ## Alternativas consideradas
 
@@ -23,5 +23,5 @@
 ## Consecuencias
 
 - **Positivas**: un único lugar para errores y arranque; paridad local y producción.
-- **Negativas**: cada ruta añade un `if`; el `catch` muestra "No pudimos cargar el catálogo" para cualquier ruta que falle (`api/index.php:90`); se instancia el repositorio 4 veces.
+- **Negativas**: cada ruta añade un `if`; el `catch` muestra "No pudimos cargar el catálogo" para cualquier ruta que falle (`api/index.php:93`); se instancia el repositorio 4 veces.
 - **Riesgos**: crecimiento descontrolado de `api/index.php` (92 líneas hoy). Umbral sugerido para pasar a tabla de rutas: unas 8 a 10 ramas (criterio del autor, no medido).

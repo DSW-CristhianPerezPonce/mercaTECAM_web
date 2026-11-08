@@ -33,20 +33,20 @@ classDiagram
     ProductRepository ..> Helpers : imagen_producto implicita
 ```
 
-*Hecho: la línea punteada es una dependencia implícita de la capa de datos hacia la de presentación (`src/ProductRepository.php:131` llama a `imagen_producto()`, definida en `src/helpers.php:19`).*
+*Hecho: la línea punteada es una dependencia implícita de la capa de datos hacia la de presentación (`src/ProductRepository.php:138` llama a `imagen_producto()`, definida en `src/helpers.php:19`).*
 *`FrontController` no es una clase: es el script `api/index.php`. Se dibuja así solo para ver la colaboración.*
 
 ## 1. Front Controller
 
-- **Dónde**: `api/index.php:5-91`; `vercel.json` (`handle: filesystem` y reescritura) y `router.php:7-11` lo reproducen en local.
-- **Problema que resuelve**: Vercel expone una sola función PHP; un único punto concentra el arranque, el manejo de errores (`api/index.php:81-91`) y la selección de ruta.
+- **Dónde**: `api/index.php:5-94`; `vercel.json` (`handle: filesystem` y reescritura) y `router.php:7-11` lo reproducen en local.
+- **Problema que resuelve**: Vercel expone una sola función PHP; un único punto concentra el arranque, el manejo de errores (`api/index.php:84-94`) y la selección de ruta.
 - **Alternativa**: un archivo PHP por página, o un micro-router/framework. No se eligió por el límite de una función en Vercel y por la decisión de no usar framework (ver [ADR-0001](../senior/adr/0001-front-controller-unico.md) y [ADR-0003](../senior/adr/0003-php-sin-framework-ni-composer.md)).
-- **Coste**: cada ruta nueva es otro `if` (`api/index.php:15`, `:25`, `:32`, `:40`, `:55`); crece contra el Open/Closed.
+- **Coste**: cada ruta nueva es otro `if` (`api/index.php:15`, `:25`, `:35`, `:43`, `:58`); crece contra el Open/Closed.
 
 ## 2. Repository
 
-- **Dónde**: `src/ProductRepository.php:6` (constructor con `PDO`), métodos en `:18`, `:66`, `:113`, `:146`.
-- **Problema**: aislar SQL de las vistas y compartir la misma consulta entre la página HTML y el JSON (`api/index.php:15-20` y `:40-49` usan `listarCatalogo`).
+- **Dónde**: `src/ProductRepository.php:9` (constructor con `PDO`), métodos en `:35`, `:78`, `:118`, `:149`; el tipado de filas está centralizado en `hidratar()` (`:19`).
+- **Problema**: aislar SQL de las vistas y compartir la misma consulta entre la página HTML y el JSON (`api/index.php:15-20` y `:43-52` usan `listarCatalogo`).
 - **Alternativa**: SQL directo en las plantillas, o un ORM. No queda claro si un ORM se evaluó; con "sin Composer" quedaba descartado en la práctica (hipótesis).
 - **Matiz**: un repositorio devuelve arrays, no entidades; es un repositorio sobre un modelo anémico (ver [dominio-ddd.md](../senior/dominio-ddd.md)).
 
@@ -54,31 +54,31 @@ classDiagram
 
 - **Dónde**: `src/Database.php:6` (`private static ?PDO`), `:12` y `:14-16`.
 - **Problema**: reutilizar una conexión por petición, algo que importa con Neon (cada conexión nueva cuesta).
-- **Alternativa**: crear el PDO en cada repositorio, o un contenedor de dependencias. El repositorio recibe el PDO por constructor (`src/ProductRepository.php:6`), lo que lo hace testeable aunque el singleton no lo sea. Mitigación razonable.
+- **Alternativa**: crear el PDO en cada repositorio, o un contenedor de dependencias. El repositorio recibe el PDO por constructor (`src/ProductRepository.php:9`), lo que lo hace testeable aunque el singleton no lo sea. Mitigación razonable.
 
 ## 4. Template View (render con extract)
 
 - **Dónde**: `src/helpers.php:49-55`, `extract` en `:51`.
-- **Problema**: componer HTML sin motor de plantillas, con buffer de salida y plantillas anidadas (`api/index.php:42-49`).
+- **Problema**: componer HTML sin motor de plantillas, con buffer de salida y plantillas anidadas (`api/index.php:45-52`).
 - **Alternativa**: Twig/Blade (requieren Composer). Riesgo conocido: `extract` deja visibles `$template` y `$vars` dentro de la plantilla; `EXTR_SKIP` evita pisar variables existentes pero oculta de dónde sale cada variable.
 
 ## 5. Validación en el borde y consultas parametrizadas
 
-- **Dónde**: `query_param()` recorta y normaliza (`src/helpers.php:58-66`); id acotado a rango INTEGER (`src/ProductRepository.php:66-69`, `:113-115`); LIKE escapado con `addcslashes` (`src/ProductRepository.php:30-31`); PDO sin emulación (`src/Database.php:54-56`).
+- **Dónde**: `query_param()` recorta y normaliza (`src/helpers.php:58-66`); id acotado a rango INTEGER con `ID_MAXIMO` e `idValido()` (`src/ProductRepository.php:7`, `:13-16`, usados en `:80` y `:120`); ids del carrito aceptados solo como enteros completos (`api/index.php:28-29`); LIKE escapado con `addcslashes` (`src/ProductRepository.php:47-48`); PDO sin emulación (`src/Database.php:54-56`).
 - **Problema**: evitar inyección SQL, comodines accidentales y un 500 por ids fuera de rango.
 - **Alternativa**: confiar en el motor para rechazar. Se eligió defender en la capa de aplicación; el beneficio es devolver 404 en lugar de 500.
 
 ## 6. Progressive Enhancement
 
-- **Dónde**: filtros como enlaces con `url_catalogo()` (`src/helpers.php:69`); botón `disabled` hasta que el JS lo activa (`templates/partials/boton-agregar.php:11`); `carrito.js` con `defer` (`templates/layout.php:30`).
+- **Dónde**: filtros como enlaces con `url_catalogo()` (`src/helpers.php:69`); botón `disabled` hasta que el JS lo activa (`templates/partials/boton-agregar.php:11`); `carrito.js` con `defer` (`templates/layout.php:31`); el mensaje "Cargando…" nace oculto y solo lo muestra el JS (`templates/carrito.php:9`).
 - **Problema**: que el catálogo funcione sin JS y que el carrito no dependa del servidor para agregar.
 - **Alternativa**: SPA. No se eligió: no hay build ni framework JS.
 
 ## 7. Estado en el cliente con reconciliación en el servidor
 
-- **Dónde**: guarda solo `{id: cantidad}` (`assets/js/carrito.js:36`), lee con fallback (`:16`), pide datos vigentes (`:216`), depura agotados (`:224-236`), sincroniza pestañas (`:244`).
+- **Dónde**: guarda solo `{id: cantidad}` (`assets/js/carrito.js:36`), lee con fallback (`:16`), pide datos vigentes (`:278`), relee el carrito al llegar la respuesta y depura agotados (`:286-302`), sincroniza lista y total con otras pestañas (`storage`, `:356`) y al volver con «Atrás» (`pageshow`, `:364`), y actualiza las filas en su lugar (`:250`).
 - **Problema**: carrito sin usuarios ni sesión.
-- **Alternativa**: carrito en sesión PHP o en tabla. Ver [ADR-0002](../senior/adr/0002-carrito-en-navegador.md). Los totales y topes solo se garantizan en JS; el servidor solo recorta a 50 ids (`api/index.php:26`).
+- **Alternativa**: carrito en sesión PHP o en tabla. Ver [ADR-0002](../senior/adr/0002-carrito-en-navegador.md). Los totales y topes solo se garantizan en JS; el servidor solo recorta a 50 ids enteros (`api/index.php:28-29`).
 
 ## 8. Upsert idempotente (Transaction Script)
 
@@ -88,7 +88,7 @@ classDiagram
 
 ## Lo que no se aplicó (y conviene saberlo)
 
-- **Hecho**: no hay capa de servicio/casos de uso; el controlador llama al repositorio directamente (`api/index.php:41-43`).
+- **Hecho**: no hay capa de servicio/casos de uso; el controlador llama al repositorio directamente (`api/index.php:44-46`).
 - **Hecho**: no hay interfaces para el repositorio; no hay inversión de dependencias formal.
 
 ## Mini reto

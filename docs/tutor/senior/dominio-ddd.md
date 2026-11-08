@@ -20,7 +20,7 @@ flowchart LR
     ped -.-> inv
 ```
 
-*Existen hoy tres contextos (líneas continuas): Catálogo, Carrito (vive en `assets/js/carrito.js`, lee de Catálogo por `/api/carrito`, `api/index.php:25-30`) e Importación (traduce el Excel al modelo).*
+*Existen hoy tres contextos (líneas continuas): Catálogo, Carrito (vive en `assets/js/carrito.js`, lee de Catálogo por `/api/carrito`, `api/index.php:25-33`) e Importación (traduce el Excel al modelo).*
 *Los contextos con "hipotetico" y las líneas punteadas son **propuesta**, no existen en el código.*
 *Hecho: la importación actúa como capa anticorrupción implícita: convierte "Precio Estimado (COP)" y "Presentación" en `precio_referencia` y `unidad` (ver encabezados en `data/productos.csv` frente a `data/productos_importar.csv`).*
 
@@ -72,8 +72,8 @@ Agregado candidato: **Producto** (raíz) con Ficha técnica y referencias a Prod
 | Disponibilidad >= 0 | CHECK (`database/schema.sql:27`) y `max(0, ...)` en el importador | Doble protección |
 | Producto único por nombre y productor | `UNIQUE` (`database/schema.sql:32`) y upsert | Correcto |
 | Categoría y productor existentes | FK en el esquema | Correcto |
-| Solo activos son visibles | Filtro `activo = TRUE` repetido en 4 consultas (por ejemplo `src/ProductRepository.php:20`) | Regla repetida, fácil de olvidar en la quinta |
-| Carrito: cantidad >= 1, <= disponibilidad, máximo 50, total = suma precio por cantidad | **Solo en JS** (`assets/js/carrito.js:77-104`); el servidor solo recorta a 50 ids (`api/index.php:26`) | No existe barrera en servidor |
+| Solo activos son visibles | Filtro `activo = TRUE` repetido en 4 consultas (por ejemplo `src/ProductRepository.php:37`) | Regla repetida, fácil de olvidar en la quinta |
+| Carrito: cantidad >= 1, <= disponibilidad, máximo 50, total = suma precio por cantidad | **Solo en JS** (`assets/js/carrito.js:80-107` al agregar, `:140-158` al editar; cantidad 0 quita el producto); el servidor solo recorta a 50 ids enteros (`api/index.php:28-29`) | No existe barrera en servidor |
 
 ## Lenguaje ubicuo y términos inconsistentes
 
@@ -100,18 +100,18 @@ Términos (CSV del Excel entre paréntesis cuando difiere): Producto; Precio de 
 - Unidad como `VARCHAR` libre (obsesión por primitivos): sin conversión ni lista válida.
 - Asociación como texto: sin identidad ni deduplicación.
 - Afirmaciones agroecológicas sin trazabilidad (fuente y estado de verificación): `CLAUDE.md` exige fuente real; el modelo no la guarda.
-- Dinero como `float` en PHP (`src/ProductRepository.php:54`) aunque la columna sea `NUMERIC(12,2)`; COP no usa decimales.
+- Dinero como `float` en PHP (`src/ProductRepository.php:22`) aunque la columna sea `NUMERIC(12,2)`; COP no usa decimales.
 - Desajuste de encabezados Excel/CSV del importador (hipótesis arriba).
 
 **Baja**
 - El nombre del archivo de imagen se deriva solo del nombre del producto: dos productores con el mismo producto pueden colisionar (hipótesis, por la función `slug` en `scripts/importar_productos.php:168`).
 - Reimportar reactiva productos retirados (hipótesis, por el upsert).
-- Fuga de infraestructura: el repositorio llama a `imagen_producto()` (`src/ProductRepository.php:131`).
-- Lógica en el controlador: el `catch` genera HTML (`api/index.php:84-91`).
+- Fuga de infraestructura: el repositorio llama a `imagen_producto()` (`src/ProductRepository.php:138`).
+- Lógica en el controlador: el `catch` genera HTML (`api/index.php:87-94`).
 
 ## Eventos de dominio candidatos (propuesta)
 
-ProductoPublicado, ProductoRetirado, PrecioReferenciaActualizado, DisponibilidadDeclaradaActualizada, ProductoAgotado, ProductoAgregadoAlCarrito, CarritoAjustadoPorDisponibilidad (ya ocurre en el JS: `assets/js/carrito.js:224-236`), CatalogoImportado. Futuros: CarritoConfirmado, PedidoCreado.
+ProductoPublicado, ProductoRetirado, PrecioReferenciaActualizado, DisponibilidadDeclaradaActualizada, ProductoAgotado, ProductoAgregadoAlCarrito, CarritoAjustadoPorDisponibilidad (ya ocurre en el JS: `assets/js/carrito.js:288-302`, también al sincronizar con otra pestaña), CatalogoImportado. Futuros: CarritoConfirmado, PedidoCreado.
 
 ## Value objects candidatos (propuesta)
 

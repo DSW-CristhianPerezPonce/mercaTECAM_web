@@ -1,15 +1,15 @@
 {
   "ruta": "C:\\claudeVs_App\\merca_tecam_web",
   "archivos": 5,
-  "funciones": 53,
-  "ccn_medio": 2.91,
+  "funciones": 68,
+  "ccn_medio": 2.88,
   "funciones_ccn_mayor_10": 2,
   "funciones_nloc_mayor_40": 2,
   "ciclos_entre_modulos": [],
   "puntajes": {
     "Complejidad media": 7.1,
-    "Funciones simples": 9.6,
-    "Funciones cortas": 9.6,
+    "Funciones simples": 9.7,
+    "Funciones cortas": 9.7,
     "Pocos parámetros": 10.0,
     "Bajo acoplamiento": 10.0
   },
@@ -35,7 +35,7 @@
     {
       "archivo": "assets\\js\\carrito.js",
       "funcion": "(anonymous)",
-      "linea": 77,
+      "linea": 80,
       "ccn": 10,
       "nloc": 27,
       "params": 0
@@ -51,17 +51,41 @@
     {
       "archivo": "src\\ProductRepository.php",
       "funcion": "ProductRepository::listarCatalogo",
-      "linea": 18,
+      "linea": 35,
       "ccn": 7,
-      "nloc": 36,
+      "nloc": 31,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "quitar",
+      "linea": 160,
+      "ccn": 7,
+      "nloc": 12,
       "params": 1
     },
     {
       "archivo": "assets\\js\\carrito.js",
       "funcion": "(anonymous)",
-      "linea": 189,
-      "ccn": 6,
+      "linea": 321,
+      "ccn": 7,
       "nloc": 10,
+      "params": 1
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "cambiarCantidad",
+      "linea": 140,
+      "ccn": 6,
+      "nloc": 19,
+      "params": 2
+    },
+    {
+      "archivo": "assets\\js\\carrito.js",
+      "funcion": "(anonymous)",
+      "linea": 288,
+      "ccn": 6,
+      "nloc": 12,
       "params": 1
     },
     {
@@ -78,22 +102,6 @@
       "linea": 69,
       "ccn": 5,
       "nloc": 5,
-      "params": 1
-    },
-    {
-      "archivo": "src\\ProductRepository.php",
-      "funcion": "ProductRepository::obtenerPorId",
-      "linea": 66,
-      "ccn": 5,
-      "nloc": 36,
-      "params": 1
-    },
-    {
-      "archivo": "assets\\js\\carrito.js",
-      "funcion": "(anonymous)",
-      "linea": 224,
-      "ccn": 5,
-      "nloc": 10,
       "params": 1
     },
     {
@@ -121,20 +129,12 @@
       "params": 1
     },
     {
-      "archivo": "assets\\js\\carrito.js",
-      "funcion": "leer",
-      "linea": 16,
+      "archivo": "src\\ProductRepository.php",
+      "funcion": "ProductRepository::obtenerPorId",
+      "linea": 78,
       "ccn": 4,
-      "nloc": 16,
-      "params": 0
-    },
-    {
-      "archivo": "assets\\js\\carrito.js",
-      "funcion": "cambiarCantidad",
-      "linea": 121,
-      "ccn": 4,
-      "nloc": 8,
-      "params": 2
+      "nloc": 30,
+      "params": 1
     }
   ],
   "dependencias": []

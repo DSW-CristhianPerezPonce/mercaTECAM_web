@@ -10,7 +10,9 @@
 
 ## Decisión
 
-El carrito vive en `localStorage` bajo la clave `mercatecam.carrito.v1`, guardando solo `{id: cantidad}` y con máximo 50 productos (`assets/js/carrito.js:7-8`, `:36`). Hay fallback en memoria (`:16`). Nombres, precios y disponibilidad se releen de `GET /api/carrito?ids=` (`:216`; `api/index.php:25-30`), las cantidades se recortan a la disponibilidad y los productos agotados o retirados se descartan con aviso (`:224-236`). Las pestañas se sincronizan por el evento `storage` (`:244`).
+El carrito vive en `localStorage` bajo la clave `mercatecam.carrito.v1`, guardando solo `{id: cantidad}` y con máximo 50 productos (`assets/js/carrito.js:7-8`, `:36`). Hay fallback en memoria (`:16`). Nombres, precios y disponibilidad se releen de `GET /api/carrito?ids=` (`:278`; `api/index.php:25-33`, que solo acepta ids enteros completos), las cantidades se recortan a la disponibilidad y los productos agotados o retirados se descartan con aviso (`:288-302`). Al llegar la respuesta se vuelve a leer el carrito guardado, porque pudo cambiar en otra pestaña mientras tanto (`:286`).
+
+**Actualización (commit `5593565`)**: la página `/carrito` se mantiene al día con la fuente de verdad local. El evento `storage` (`:356`) sincroniza lista y total, no solo el contador, y pide al servidor los productos que aún no conoce. El evento `pageshow` (`:364`) recarga los datos cuando el navegador restaura la página desde el `bfcache`. Las filas se actualizan en su lugar (`:250`) para no perder el foco del teclado.
 
 ## Alternativas consideradas
 
@@ -23,5 +25,5 @@ El carrito vive en `localStorage` bajo la clave `mercatecam.carrito.v1`, guardan
 ## Consecuencias
 
 - **Positivas**: sin estado en servidor, sin login, funciona con poca infraestructura; los datos sensibles (precio) siempre vienen del servidor.
-- **Negativas**: las invariantes (tope, total) solo existen en JS (`assets/js/carrito.js:77-104`); el carrito no sigue a la persona entre dispositivos.
-- **Riesgos**: al construir el checkout, el servidor debe revalidar cantidades, disponibilidad y precio; el carrito del cliente no es de fiar. El 50 está duplicado en `api/index.php:26` y en `assets/js/carrito.js:8`.
+- **Negativas**: las invariantes (tope, total) solo existen en JS (`assets/js/carrito.js:80-107`, `:140-158`); el carrito no sigue a la persona entre dispositivos.
+- **Riesgos**: al construir el checkout, el servidor debe revalidar cantidades, disponibilidad y precio; el carrito del cliente no es de fiar. El 50 está duplicado en `api/index.php:29` y en `assets/js/carrito.js:8`.

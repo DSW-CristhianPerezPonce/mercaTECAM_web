@@ -10,7 +10,7 @@
 
 ## Decisión
 
-Se activa la extensión `unaccent` (`database/schema.sql:5`) y se busca con `unaccent(p.nombre) ILIKE '%' || unaccent(:busqueda) || '%' ESCAPE '\'` (`src/ProductRepository.php:30`). Los comodines `%`, `_` y `\` del usuario se escapan con `addcslashes` (`src/ProductRepository.php:31`) y el valor va como parámetro. El texto se limita a 100 caracteres (`api/index.php:12`, `src/helpers.php:58`).
+Se activa la extensión `unaccent` (`database/schema.sql:5`) y se busca con `unaccent(p.nombre) ILIKE '%' || unaccent(:busqueda) || '%' ESCAPE '\'` (`src/ProductRepository.php:47`). Los comodines `%`, `_` y `\` del usuario se escapan con `addcslashes` (`src/ProductRepository.php:31`) y el valor va como parámetro. El texto se limita a 100 caracteres (`api/index.php:12`, `src/helpers.php:58`).
 
 ## Alternativas consideradas
 
