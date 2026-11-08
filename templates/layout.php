@@ -12,6 +12,10 @@
         <div class="contenedor encabezado__fila">
             <a class="marca" href="/">merca<span>TECAM</span></a>
             <p class="encabezado__lema">Del campo agroecológico a tu mesa</p>
+            <a class="carrito-enlace" href="/carrito">
+                <span aria-hidden="true">🧺</span> Carrito
+                <span class="carrito-enlace__contador" data-carrito-contador aria-label="productos en el carrito">0</span>
+            </a>
         </div>
     </header>
 
@@ -22,5 +26,7 @@
     <footer class="pie">
         <div class="contenedor">mercaTECAM · E-commerce agroecológico</div>
     </footer>
+    <div class="aviso-carrito" role="status" aria-live="polite" data-carrito-aviso hidden></div>
+    <script src="/assets/js/carrito.js" defer></script>
 </body>
 </html>

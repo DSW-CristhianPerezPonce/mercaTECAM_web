@@ -21,6 +21,22 @@ try {
         return;
     }
 
+    // HU-04: datos vigentes de los productos del carrito (?ids=1,2,3). El carrito vive en el navegador.
+    if ($method === 'GET' && $path === '/api/carrito') {
+        $ids = array_slice(array_map('intval', explode(',', query_param('ids', 500) ?? '')), 0, 50);
+        $repo = new ProductRepository(Database::connection());
+        json_response(['data' => $repo->obtenerParaCarrito($ids)]);
+        return;
+    }
+
+    if ($method === 'GET' && $path === '/carrito') {
+        echo render('layout', [
+            'titulo'    => 'Carrito de compras',
+            'contenido' => render('carrito'),
+        ]);
+        return;
+    }
+
     if ($method === 'GET' && ($path === '/' || $path === '/catalogo')) {
         $repo = new ProductRepository(Database::connection());
         echo render('layout', [

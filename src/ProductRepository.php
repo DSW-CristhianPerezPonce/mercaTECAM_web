@@ -104,6 +104,40 @@ final class ProductRepository
     }
 
     /**
+     * Datos vigentes de varios productos activos para el carrito (HU-04).
+     * Ids inválidos o inexistentes se ignoran.
+     *
+     * @param int[] $ids
+     * @return array<int, array<string, mixed>>
+     */
+    public function obtenerParaCarrito(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter($ids, static fn ($id) => $id >= 1 && $id <= 2147483647)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $marcas = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->db->prepare(
+            "SELECT p.id, p.nombre, p.imagen, p.precio_referencia, p.unidad, p.disponibilidad,
+                    pr.nombre AS productor
+               FROM productos p
+               JOIN productores pr ON pr.id = p.productor_id
+              WHERE p.activo = TRUE AND p.id IN ($marcas)
+              ORDER BY p.nombre"
+        );
+        $stmt->execute($ids);
+
+        return array_map(static function (array $r): array {
+            $r['id']                = (int) $r['id'];
+            $r['precio_referencia'] = (float) $r['precio_referencia'];
+            $r['disponibilidad']    = (int) $r['disponibilidad'];
+            $r['imagen']            = imagen_producto($r['imagen']);
+            return $r;
+        }, $stmt->fetchAll());
+    }
+
+    /**
      * Todas las categorías con la cantidad de productos activos de cada una
      * (se listan también las que aún no tienen productos).
      *

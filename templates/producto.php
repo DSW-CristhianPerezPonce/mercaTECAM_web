@@ -47,6 +47,15 @@ $secciones = [
                 </div>
             </dl>
 
+            <?php if (!$agotado): ?>
+                <div class="ficha__compra">
+                    <label for="cantidad">Cantidad</label>
+                    <input class="cantidad__campo" type="number" id="cantidad" name="cantidad"
+                           value="1" min="1" max="<?= (int) $p['disponibilidad'] ?>" step="1" inputmode="numeric">
+                    <?= render('partials/boton-agregar', ['p' => $p, 'cantidadDesde' => '#cantidad']) ?>
+                </div>
+            <?php endif; ?>
+
             <?php if ($p['descripcion']): ?>
                 <p class="ficha__descripcion"><?= e($p['descripcion']) ?></p>
             <?php endif; ?>

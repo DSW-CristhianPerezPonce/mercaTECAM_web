@@ -41,6 +41,8 @@ Los productos reales iniciales (Asociación La Tulpa) están en `data/productos_
 | `/?categoria=frutas&q=fresa` | Catálogo filtrado por categoría y/o nombre (HU-02; sin distinguir mayúsculas ni tildes) |
 | `/api/productos` | JSON con los productos activos; acepta los mismos `categoria` y `q` |
 | `/producto/:id` | Ficha técnica del producto (HU-03); 404 si no existe, aviso «Agotado» si la disponibilidad es 0 |
+| `/carrito` | Carrito de compras (HU-04); se guarda en el navegador (`localStorage`) y requiere JavaScript |
+| `/api/carrito?ids=1,2` | JSON con precio, unidad y disponibilidad vigentes de los productos del carrito |
 
 ## Despliegue (Vercel + Neon)
 
