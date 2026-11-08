@@ -4,7 +4,7 @@ Seis refactors ordenados por relación valor/esfuerzo. No hay suite de tests: la
 
 ## 1. Repositorio único y perezoso en el front controller
 
-**Antes** (`api/index.php:16`, `:27`, `:41`, ~`:57`):
+**Antes** (`api/index.php:16`, `:27`, `:41`, `:56`):
 
 ```php
 $repo = new ProductRepository(Database::connection());
@@ -105,7 +105,7 @@ Seis parámetros, uno de salida; ramas para vacío, URL, archivo inexistente, GD
 
 ## 5. Transacción con rollback y fotos fuera de la escritura
 
-**Antes** (`scripts/importar_productos.php:75` `beginTransaction`, `:118` `commit`): el bucle llama a `prepararImagen` (~`:100`), que escribe fotos al disco, dentro de la transacción. No hay `try/catch` con `rollBack` explícito en esas líneas; si una fila lanza excepción, la conexión se cierra al terminar el script (hipótesis: PostgreSQL revierte la transacción abierta), pero las fotos ya copiadas quedan en `assets/productos/` y no hay mensaje claro de qué fila falló.
+**Antes** (`scripts/importar_productos.php:75` `beginTransaction`, `:118` `commit`): el bucle llama a `prepararImagen` (`:100`), que escribe fotos al disco, dentro de la transacción. No hay `try/catch` con `rollBack` explícito en esas líneas; si una fila lanza excepción, la conexión se cierra al terminar el script (hipótesis: PostgreSQL revierte la transacción abierta), pero las fotos ya copiadas quedan en `assets/productos/` y no hay mensaje claro de qué fila falló.
 
 **Después** (propuesta):
 

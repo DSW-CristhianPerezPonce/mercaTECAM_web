@@ -23,12 +23,12 @@ Formato: severidad | archivo:línea | principio | por qué importa | propuesta.
 
 - alta | `scripts/importar_productos.php:19-124` | SRP, testabilidad | ~105 líneas globales mezclan lectura, validación, SQL y fotos; no se puede probar sin ejecutar todo (las funciones se declaran después del `exit`) | dividir en funciones y un `main` (ver refactor 5).
 - alta | `scripts/importar_productos.php:216` | SRP, parámetro de salida | `prepararImagen` tiene 6 parámetros incluido `&$errores`, CCN 11, anidamiento; si `imagecreatefrom*` devuelve false cae a `copy` sin aviso (hecho según el informe de revisión; la rama sin GD de `:255-258` sí avisa del peso de la foto) | devolver `{ruta, avisos}` (refactor 4).
-- alta | `scripts/importar_productos.php:75-118` | Robustez | las fotos se escriben dentro de la transacción y no hay `try/catch` con `rollBack` visible | refactor 5.
+- alta | `scripts/importar_productos.php:75-118` | Robustez | las fotos se escriben dentro de la transacción y no hay `try/catch` con `rollBack` (verificado: el script no tiene ninguno) | refactor 5.
 
 ### Media
 
-- media | `src/ProductRepository.php:53`, `:131`, `:154` (y ~`:100`) | DRY | casteos de tipos repetidos en cada método | método privado de tipado (refactor 2).
-- media | `api/index.php:16`, `:27`, `:41`, `~:57` | DRY | `new ProductRepository(Database::connection())` en 4 ramas; en `/carrito` no hace falta conexión | repositorio perezoso (refactor 1).
+- media | `src/ProductRepository.php:53`, `:131`, `:154` (y `:100`) | DRY | casteos de tipos repetidos en cada método | método privado de tipado (refactor 2).
+- media | `api/index.php:16`, `:27`, `:41`, `:56` | DRY | `new ProductRepository(Database::connection())` en 4 ramas; en `/carrito` no hace falta conexión | repositorio perezoso (refactor 1).
 - media | `assets/js/carrito.js:77-104` | SRP | el manejador de clic lee DOM, valida, calcula, guarda y avisa (CCN 10) | función pura `calcularAgregado` (refactor 3).
 - media | `assets/js/carrito.js:139-187`, `:109` | Tamaño | `pintar` ~49 líneas e `iniciarPaginaCarrito` ~130 líneas | extraer funciones de render.
 - media | `src/helpers.php:49-51` | Estado oculto | `extract()` deja la plantilla ver `$template` y `$vars` | pasar un array explícito o documentar variables esperadas en cada plantilla.
@@ -42,7 +42,7 @@ Formato: severidad | archivo:línea | principio | por qué importa | propuesta.
 - baja | `src/ProductRepository.php:69`, `:115` | Números mágicos | `2147483647` duplicado | constante `ID_MAXIMO`.
 - baja | `scripts/importar_productos.php:95-96` | Claridad | `?? null ?: null` es difícil de leer y trata "0" como vacío | `vacioANulo()` (refactor 6).
 - baja | `scripts/importar_productos.php:177` | Heurística sin tests | `parsearNumero` decide qué es "1.500" (miles o decimal) | tests de tabla.
-- baja | `scripts/importar_productos.php:257` | Número mágico | `300*1024` | constante nombrada.
+- baja | `scripts/importar_productos.php:258` | Número mágico | `300*1024` | constante nombrada.
 - baja | `router.php:7` | Defensivo | `$_SERVER['REQUEST_URI']` sin `?? '/'`, a diferencia de `api/index.php:7` | añadir el valor por defecto.
 - baja | varios | Convención | mezcla de snake_case (helpers) y camelCase (métodos) | decidir y documentar.
 - baja | plantillas de catálogo, ficha y carrito | DRY | la regla "agotado" se repite en 3 plantillas | un helper o parcial.
@@ -60,7 +60,7 @@ Formato: severidad | archivo:línea | principio | por qué importa | propuesta.
 ## 4. Lo que está bien hecho
 
 - **Seguridad básica sólida**: consultas preparadas, escape de LIKE, `e()` en salida (`src/ProductRepository.php:30-31`, `src/helpers.php:7`, `src/Database.php:54-56`).
-- **Entradas defendidas**: id validado con regex y rango (`api/index.php:~58`, `src/ProductRepository.php:69`), `query_param` con límite de longitud (`src/helpers.php:58`).
+- **Entradas defendidas**: id validado con regex y rango (`api/index.php:55`, `src/ProductRepository.php:69`), `query_param` con límite de longitud (`src/helpers.php:58`).
 - **Carrito prudente**: guarda solo `{id: cantidad}`, fallback en memoria si el almacenamiento está bloqueado, sincroniza entre pestañas (`assets/js/carrito.js:16`, `:36`, `:244`).
 - **Disciplina de tipos**: `strict_types` y clases `final` (`src/Database.php:4`, `src/ProductRepository.php:4`, `declare` en la línea 2 de cada archivo de `src/`).
 - **Importador operable**: idempotente con `ON CONFLICT`, tolera BOM y Windows-1252, y usa códigos de salida 0/1/2.

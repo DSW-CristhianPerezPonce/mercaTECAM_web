@@ -10,7 +10,7 @@
 
 ## Decisión
 
-`api/index.php` es el único punto de entrada; las rutas son ramas `if` por método y ruta (`api/index.php:15`, `:25`, `:32`, `:40`, ~`:58`), con un `try/catch Throwable` global (`api/index.php:81-91`) y un 404 final (~`:76`).
+`api/index.php` es el único punto de entrada; las rutas son ramas `if` por método y ruta (`api/index.php:15`, `:25`, `:32`, `:40`, `:55`), con un `try/catch Throwable` global (`api/index.php:81-91`) y un 404 final (~`:76`).
 
 ## Alternativas consideradas
 

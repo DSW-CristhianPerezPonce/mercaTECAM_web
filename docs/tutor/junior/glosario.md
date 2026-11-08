@@ -13,7 +13,7 @@
 | Categoría y slug | Grupo del producto y su nombre para URL (por ejemplo `verduras`). Hay 6. | `database/schema.sql:9`, `:43-50` |
 | Productor | Persona o finca que ofrece el producto. | `database/schema.sql:15` |
 | Asociación | Organización del productor; hoy es texto libre. | columna `asociacion` de `data/productos_importar.csv` |
-| Ficha técnica | Especificaciones, prácticas agroecológicas y valor agregado de un producto. | `database/schema.sql:38-40` (aprox.) |
+| Ficha técnica | Especificaciones, prácticas agroecológicas y valor agregado de un producto. | `database/schema.sql:38-40` |
 | Carrito | Lista `{id: cantidad}` guardada en el navegador, máximo 50 productos. | `assets/js/carrito.js:7-8` |
 
 ## Términos técnicos

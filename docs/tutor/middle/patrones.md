@@ -41,7 +41,7 @@ classDiagram
 - **Dónde**: `api/index.php:5-91`; `vercel.json` (`handle: filesystem` y reescritura) y `router.php:7-11` lo reproducen en local.
 - **Problema que resuelve**: Vercel expone una sola función PHP; un único punto concentra el arranque, el manejo de errores (`api/index.php:81-91`) y la selección de ruta.
 - **Alternativa**: un archivo PHP por página, o un micro-router/framework. No se eligió por el límite de una función en Vercel y por la decisión de no usar framework (ver [ADR-0001](../senior/adr/0001-front-controller-unico.md) y [ADR-0003](../senior/adr/0003-php-sin-framework-ni-composer.md)).
-- **Coste**: cada ruta nueva es otro `if` (`api/index.php:15`, `:25`, `:32`, `:40`, `~:58`); crece contra el Open/Closed.
+- **Coste**: cada ruta nueva es otro `if` (`api/index.php:15`, `:25`, `:32`, `:40`, `:55`); crece contra el Open/Closed.
 
 ## 2. Repository
 

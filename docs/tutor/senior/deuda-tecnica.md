@@ -15,14 +15,14 @@ Convención: hecho = visto en código; hipótesis = marcada. Esfuerzo S (horas),
 | 3 | Importador: script global sin atomicidad clara | `scripts/importar_productos.php:19-124`, transacción `:75-118` | Intestable; fallos a mitad de lote dejan fotos huérfanas | M | Datos de catálogo corruptos o importaciones difíciles de depurar | Alta |
 | 4 | `prepararImagen` con 6 parámetros y fallo silencioso | `scripts/importar_productos.php:216` | Fotos mal procesadas sin aviso | M | Imágenes rotas o pesadas en producción | Media |
 | 5 | Duplicación PHP y JS (formato COP, textos de disponibilidad, tope 50) | `src/helpers.php:13` frente a `assets/js/carrito.js:48`; `api/index.php:26` frente a `assets/js/carrito.js:8` | Divergencias de redondeo o de reglas | S | Mensajes y totales inconsistentes | Media |
-| 6 | Casteos y repositorio duplicados | `src/ProductRepository.php:53`, `:131`, `:154`; `api/index.php:16`, `:27`, `:41`, `~:57` | Cambiar un campo exige tocar varios sitios | S | Contrato JSON inconsistente | Media |
+| 6 | Casteos y repositorio duplicados | `src/ProductRepository.php:53`, `:131`, `:154`; `api/index.php:16`, `:27`, `:41`, `:56` | Cambiar un campo exige tocar varios sitios | S | Contrato JSON inconsistente | Media |
 | 7 | Búsqueda sin índice, sin paginación ni caché | `src/ProductRepository.php:30`, `:18` | Latencia al crecer el catálogo (hipótesis: no medida) | M | Degradación en Neon por escaneos completos | Media |
 | 8 | Repositorio depende de helpers (capa de datos a presentación) | `src/ProductRepository.php:131` | Acoplamiento oculto; solo `/api/carrito` normaliza imagen | S | Imágenes distintas en `/api/productos` y `/api/carrito` | Media |
 | 9 | Manejo de errores genérico y observabilidad pobre | `api/index.php:81-91` | Mensaje "No pudimos cargar el catálogo" para cualquier ruta; log sin ruta | S | Diagnóstico lento de incidentes | Media |
 | 10 | Migraciones por `schema.sql` sin versionado | `database/schema.sql` | No hay historial ni rollback de cambios | M | Cambios de esquema difíciles de coordinar | Media |
 | 11 | Fotos binarias versionadas en git | `assets/productos/` (decisión: `CLAUDE.md`) | Repo que crece | M | Clones lentos con cientos de fotos | Baja |
 | 12 | `extract()` y helpers mezclados (render, HTTP, formato) | `src/helpers.php:49-51`, `:75` | Variables implícitas en plantillas | M | Errores difíciles de rastrear | Baja |
-| 13 | Números mágicos y heurísticas | `2147483647` (`src/ProductRepository.php:69`, `:115`), `300*1024` (~`scripts/importar_productos.php:257`), `parsearNumero` (`:177`) | Cambios sin contexto | S | Fallos sutiles al ajustar | Baja |
+| 13 | Números mágicos y heurísticas | `2147483647` (`src/ProductRepository.php:69`, `:115`), `300*1024` (`scripts/importar_productos.php:258`), `parsearNumero` (`:177`) | Cambios sin contexto | S | Fallos sutiles al ajustar | Baja |
 | 14 | Hipótesis de exposición de archivos | `vercel.json` (`handle: filesystem`) con `/src` y `/data` en el repo | Posible lectura de `src/Database.php` o `data/productos.csv` como estáticos | S | Fuga de información, si se confirma | **Verificar ya** |
 
 ## Plan sugerido en 3 etapas
