@@ -2,3 +2,6 @@
 .vercel/
 /data/fotos/*
 !/data/fotos/.gitkeep
+.env.example
+CLAUDE.md
+.claude/
